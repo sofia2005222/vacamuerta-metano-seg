@@ -1,35 +1,19 @@
-# Plan de trabajo (5 semanas, grupo de 3 o 4)
+# Plan de trabajo (4 semanas)
 
-Las fechas reales dependen de la entrega y de la jornada de pósters: completar acá cuando la cátedra las anuncie.
+Entrega: primeros días de diciembre de 2026. Cada tarea es un issue de GitHub con su hito (`Semana 1` a `Semana 4`, `Entrega`). El plan se ajusta sobre la marcha.
 
-| Semana | Objetivo | Entregable de la semana |
-|---|---|---|
-| 1 | Aprobación del tema y datos en mano | Mail al profesor enviado (`PROPUESTA_PROFESOR.md`); `pytest` verde; AOI descargado; shapefile de pozos recortado; radio calibrado |
-| 2 | Baseline + empezar el etiquetado manual | `build-patches` corrido; corrida A entrenada; 50 % de los parches manuales |
-| 3 | Etiquetado terminado + ablaciones | 100–150 parches manuales; corridas A–E con 3 semillas; acuerdo entre etiquetadoras |
-| 4 | Análisis y caso de estudio | Tabla de resultados; análisis de errores (falsos positivos / negativos con imágenes); inferencia sobre Sierra Barrosa y Añelo; mapas |
-| 5 | Informe y póster | Informe IEEE ≤ 8 páginas; póster A0/A1 vertical; ensayo de la presentación oral de ~5 min |
+| Semana | Sofi (`sofia2005222`) | Agus (`agusbarrena`) | Bian (`biancapaz`) |
+|---|---|---|---|
+| **1** · 3–9 nov · bases | Cobertura de Cloud Score+; bucket y accesos; script GEE de mediana mensual; exportar imágenes | Esqueleto del repo; **formato de recorte**; U-Net con recortes falsos | Prueba de SAM con 20 locaciones; generador de máscaras propuestas; medir tiempo con 10 recortes (decide el plan de respaldo de ADR-0008) |
+| **2** · 10–16 nov · etiquetado | Validar ~100 recortes; recortes por split; correcciones del dataset | Validar ~100 recortes; entrada de 6 bandas; los 3 modos de H2; curvas | Validar ~100 recortes; métricas por píxel y por objeto; locación capturada y primera detección |
+| **3** · 17–23 nov · experimentos | Rotación del acuerdo entre etiquetadoras; revisión de 20 detecciones sin registro; informe (problema, datos, estado del arte) | Los 6 entrenamientos (3 vs. 6 bandas × 3 modos) | Evaluación en `test_anelo` y `test_externo`, matrices, ejemplos, cálculo del acuerdo |
+| **4** · 24–30 nov · cierre | Póster | Análisis de errores y casos patológicos | Backtesting con el mejor modelo |
+| **1–4 dic** | Informe final: cada una escribe su etapa | | |
 
-## Reparto sugerido
+## Si nos atrasamos: recorte en este orden
 
-| Rol | Tareas |
-|---|---|
-| Datos | `fetch-s2`, `prepare-wells`, calibración del radio, `build-patches`, `summary.json` |
-| Modelo | Entrenamientos y ablaciones (Colab/Kaggle), semillas, curvas de entrenamiento |
-| Evaluación | Coordinar el etiquetado manual (QGIS), acuerdo entre etiquetadoras, métricas, análisis de errores |
-| Comunicación | Informe, póster, caso de estudio, ensayo oral |
+1. Backtesting solo en la Zona Añelo y con imágenes trimestrales en lugar de mensuales.
+2. La clase pileta (el problema queda locación / fondo).
+3. La variante intermedia de bandas (RGB + NIR), que ya era opcional.
 
-Todas colaboran en el etiquetado manual.
-
-## Qué decidir juntas cuanto antes
-
-1. ¿Qué AOIs usar además de `sierra_barrosa`? (más variedad = mejor generalización, más trabajo de etiquetado).
-2. Convenciones de etiquetado (`LABELING.md`, sección 1).
-3. Si se intenta una extensión (SAM o Alberta) o se profundiza en lo que ya está. **Recomendación:** hacer bien A–E antes de pensar en F.
-
-## Si falta tiempo: recorte en orden
-
-1. Dejar F (Alberta) y SAM afuera.
-2. Reducir a un solo AOI.
-3. Bajar de 3 a 2 semillas.
-4. Mantener siempre: conjunto manual de test, corridas A y B, caso Sierra Barrosa.
+**Nunca** se recorta la evaluación del modelo.
