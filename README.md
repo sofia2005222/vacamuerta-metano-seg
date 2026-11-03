@@ -116,3 +116,162 @@ docs/           DATA · LABELING · ALBERTA · PLAN · PROPUESTA_PROFESOR · POS
 - Seth et al. (2025), *Alberta Wells Dataset*, ICML. Datos: <https://zenodo.org/records/13743323>.
 - Omara et al. (2023), *OGIM*, Earth System Science Data. Datos: <https://zenodo.org/records/13259749>.
 - Reed et al. (2015), *Training deep neural networks on noisy labels with bootstrapping* (la pérdida `bootstrap_bce_dice`).
+
+# Alerta temprana de actividad en Vaca Muerta con imágenes satelitales
+
+Trabajo práctico de **I308 – Visión Artificial (Universidad de San Andrés)**, modalidad "propuesta de trabajo por estudiantes".
+
+> **Nota para quien use un asistente de IA (Claude u otro):** este archivo resume todo el proyecto: la idea, las decisiones tomadas y por qué, el dataset ya armado y los próximos pasos. Leelo completo antes de proponer cambios. Las decisiones de la sección 9 ya fueron discutidas; no las reabras salvo que haya un motivo nuevo.
+
+---
+
+## 1. La idea en una frase
+
+Entrenar una red neuronal que **segmente locaciones petroleras y piletas en imágenes satelitales Sentinel-2** de Vaca Muerta y usarla para **detectar locaciones nuevas antes de que empiece la perforación**, midiendo con datos oficiales cuántos meses de anticipación da el satélite.
+
+## 2. El problema (enfoque empresa)
+
+- Vaca Muerta es una formación geológica de Neuquén de la que se extrae petróleo y gas no convencional. Pasó de perforar 10–15 pozos por mes en 2018–2019 a más de 50 por mes en 2026.
+- Antes de perforar, la operadora desmonta un rectángulo de tierra (la **locación** o *pad*), que suele alojar varios pozos (en esta zona, la mediana es 4). Es visible desde el satélite.
+- **La locación aparece semanas o meses antes de la perforación.** Detectarla temprano es **inteligencia de mercado**: le sirve a cada empresa saber qué está haciendo *la competencia* (cada una ya conoce su propia actividad).
+- Quiénes la usarían: empresas de servicios (fractura, perforación, arena, agua, transporte) para anticipar demanda y clientes; proveedores de arena y agua para planificar logística; operadoras para mirar a sus vecinas y valuar bloques; inversores y analistas para anticipar producción (los pozos de hoy impactan en la producción 6–12 meses después); midstream para planificar capacidad de transporte.
+- El registro oficial ubica los pozos como **puntos** y con demora; no mide la huella en superficie ni anticipa actividad.
+
+**Referente comercial:** Sourcewater (Houston) vende este servicio en la cuenca Permian (EE. UU.) con su producto *DirtWork Alert*: escanea la cuenca cada 3–5 días y detecta locaciones nuevas. Reportan que las locaciones se desmontan típicamente 1–4 meses antes de que llegue el equipo de perforación, y que en 1 de cada 3 pozos la locación se veía antes de cualquier registro oficial. (Son reportes de la empresa, sin referato: se usan como **motivación**, no como bibliografía.)
+
+**Aplicación secundaria** (mencionar en una línea en la presentación): el mismo modelo sirve para cumplimiento ambiental (inventario de huella, verificar restauración de locaciones abandonadas).
+
+## 3. Requisitos de la cátedra (resumen del PDF de la consigna)
+
+- Problema acotado, con objetivos e hipótesis, implementable en menos del 30% del tiempo. No sobredimensionar.
+- Estado del arte **con referato** (no Wikipedia, Medium, blogs; cuidado con arXiv sin publicar).
+- Dataset con anotaciones que permitan métricas; split sugerido 70/10/20.
+- **Obligatorio implementar una red neuronal** en Python, preferentemente PyTorch.
+- Probar: entrenamiento desde cero, extracción de características (encoder congelado) y fine-tuning.
+- Curvas de entrenamiento (loss por iteración, métrica en train y val por época).
+- Evaluación: matrices de confusión, ejemplos correctos/incorrectos, casos patológicos, hipótesis sobre el comportamiento del modelo.
+- Ciclo sugerido: problema → estado del arte → dataset → modelo → evaluación → despliegue.
+- El tema debe ser aprobado por el profesor.
+
+## 4. Estado del arte (bibliografía principal)
+
+- **Ramachandran et al. (2024). "Deep learning for detecting and characterizing oil and gas well pads in satellite imagery." *Nature Communications* 15.** DOI: 10.1038/s41467-024-50334-9. Stanford. Detectan locaciones y tanques con deep learning en las cuencas Permian y Denver-Julesburg, arman datasets etiquetados y estudian la generalización a regiones nuevas. Es la referencia metodológica principal. (Su motivación es medir emisiones de metano; nosotras tomamos la metodología y la aplicamos con foco comercial.)
+- **Ronneberger et al. (2015). "U-Net: Convolutional Networks for Biomedical Image Segmentation." MICCAI.** Arquitectura base.
+- Pendiente: sumar 1–2 papers con referato de segmentación sobre Sentinel-2 (buscar en Google Scholar).
+- Existe un modelo preentrenado de ESRI ("Well Pad Detection – Permian Basin") que funciona con Sentinel-2. Requiere ArcGIS; si fuera accesible, sería una línea de base para comparar.
+
+## 5. Pipeline del proyecto
+
+1. **Imágenes:** Sentinel-2 (gratis, desde 2017, revisita de 5 días, 10 m/píxel en RGB+NIR, 20 m en SWIR). Neuquén es árido: pocas nubes. Fuentes: Copernicus Browser, Google Earth Engine o Microsoft Planetary Computer.
+2. **Etiquetado:** máscaras de segmentación dibujadas sobre la imagen con ayuda de **SAM** (clic y corrección). Clases: `locación` y `pileta` (y fondo). **Caminos quedan afuera**: a 10 m/píxel son muy finos. Los puntos oficiales de este dataset indican dónde buscar. Meta inicial: 200–400 recortes de 256×256 px (consultar con el profesor el número).
+3. **Modelo:** U-Net (librería `segmentation_models_pytorch`) con encoder preentrenado en ImageNet. Comparar desde cero vs. encoder congelado vs. fine-tuning.
+4. **Evaluación:** IoU y F1 por clase, matriz de confusión a nivel píxel, ejemplos buenos/malos, comparación test Añelo vs. test externo.
+5. **Despliegue / backtesting:** correr el modelo sobre imágenes mensuales 2019–2023, detectar cuándo aparece cada locación y compararlo con `fecha_primer_pozo` (inicio de perforación). Métricas: % de locaciones nuevas detectadas y **meses de anticipación** (mediana).
+
+## 6. Hipótesis y experimentos
+
+- **H1 (bandas):** agregar las bandas infrarrojas (NIR, SWIR) a RGB mejora la distinción entre locaciones y suelo desnudo natural de la estepa. Experimento: 3 bandas vs. más bandas (requiere adaptar la primera capa del encoder).
+- **H2 (transfer learning):** fine-tuning > encoder congelado > desde cero, sobre todo con pocos datos.
+- **H3 (generalización):** el desempeño cae en la zona de test externa (otras operadoras y otro paisaje). La diferencia entre test Añelo y test externo mide la generalización.
+- **Extra opcional:** agregar unas pocas imágenes etiquetadas de la zona externa al entrenamiento y medir cuánto se recupera el desempeño (adaptación con pocos datos).
+
+## 7. Diseño de la evaluación (división espacial)
+
+Dos niveles de test, ambos se reportan:
+
+| Split | Dónde | Para qué |
+|---|---|---|
+| `train` | Bloques de Añelo | Entrenar |
+| `val` | Bloques de Añelo | Elegir hiperparámetros y época |
+| `test_anelo` | Bloques de Añelo nunca vistos | Desempeño en la misma zona (dentro de distribución) |
+| `test_externo` | Zona oeste (Fortín de Piedra, Aguada Pichana Este, La Calera) | Generalización a otra zona y otras empresas. **Nunca se usa para entrenar ni para elegir hiperparámetros** |
+
+- La zona de Añelo se divide en una grilla de 4×4 bloques (~7,5 km de lado) y **cada bloque entero** va a un split. Así, recortes vecinos (casi iguales) no quedan repartidos entre train y test, lo que inflaría las métricas.
+- Los recortes de imagen que crucen el borde entre bloques de distinto split se descartan.
+- Por qué dos tests: Añelo es casi todo YPF (329 de 392 locaciones). Si solo se testea ahí, el modelo podría estar aprendiendo "la forma de construir de YPF". La zona externa es de Tecpetrol, Total y Pluspetrol.
+
+Conteo de locaciones por split:
+
+| Split | Locaciones | Nuevas 2019–2023 |
+|---|---|---|
+| train | 272 | 81 |
+| val | 40 | 20 |
+| test_anelo | 80 | 34 |
+| test_externo | 150 | 62 |
+
+## 8. Dataset de pozos (este directorio)
+
+**Fuente:** Secretaría de Energía de la Nación, "Producción de petróleo y gas por pozo (Capítulo IV)", datos.gob.ar, descargado en noviembre de 2026. Licencia CC-BY-4.0 (citar la fuente). Archivos de entrada: `capitulo-iv-pozos.csv` y `padrn-de-pozos-de-captulo-iv-con-fecha-de-primera-produccin.csv`.
+
+**Qué hace `armar_dataset.py`:**
+1. Filtra pozos de formación Vaca Muerta con recurso no convencional: **3.453 pozos**.
+2. Extrae coordenadas (EPSG:4326, boca de pozo).
+3. Cruza con la fecha de primera producción por `idpozo`.
+4. Agrupa en **locaciones** los pozos a menos de 60 m entre sí (en un pad las bocas están a ~10 m): **1.204 locaciones**.
+5. Asigna zonas, bloques y split.
+
+**Archivos:**
+
+| Archivo | Contenido |
+|---|---|
+| `locaciones_vaca_muerta.csv` / `.geojson` | Una fila por locación. **Archivo principal** |
+| `pozos_vaca_muerta.csv` / `.geojson` | Una fila por pozo (se une a locaciones por `locacion_id`) |
+| `zonas_estudio.json` | Recuadros de las zonas, grilla y split de cada bloque |
+| `armar_dataset.py` | Regenera todo (zonas y semilla configurables al principio) |
+
+Los `.geojson` se abren directo en QGIS o Google Earth Engine.
+
+**Zonas:**
+- Añelo (train/val/test): longitud -68.85 a -68.50, latitud -38.42 a -38.12 (~30 × 33 km). Loma Campana, Bandurria Sur, La Amarga Chica, Bajada del Palo Oeste, Cruz de Lorena. Elegida por ser el núcleo con más densidad y actividad 2019–2023.
+- Test externo: longitud -69.25 a -68.95, latitud -38.60 a -38.30.
+
+**Columnas de `locaciones_vaca_muerta.csv`:**
+
+| Columna | Significado |
+|---|---|
+| `locacion_id` | Identificador de la locación |
+| `lon`, `lat` | Centro de la locación |
+| `n_pozos` | Cantidad de pozos |
+| `fecha_primer_pozo` | Inicio de perforación del primer pozo. **Fecha de referencia del backtesting** |
+| `fecha_ultimo_pozo` | Inicio de perforación del último pozo |
+| `primera_produccion` | Primer mes con producción declarada (ver advertencias) |
+| `anio_primer_pozo` | Año del primer pozo |
+| `nueva_2019_2023` | `True` si el primer pozo es de 2019–2023 (casos del backtesting) |
+| `ampliada_luego` | `True` si se agregaron pozos más de un año después del primero: la locación ya existía en la fecha del pozo agregado |
+| `en_zona_anelo`, `en_zona_test_externo` | Pertenencia a cada zona |
+| `bloque_anelo` | Bloque de la grilla 4×4 (solo zona Añelo) |
+| `split` | `train`, `val`, `test_anelo`, `test_externo` o vacío (fuera de ambas zonas) |
+| `empresa`, `area`, `siglas` | Operadora, área de concesión y siglas de los pozos |
+
+**Advertencias:**
+- **Usar `fecha_primer_pozo` (inicio de perforación), no `primera_produccion`.** La primera producción del padrón muchas veces aparece antes del fin de la terminación del pozo, lo cual no tiene sentido físico; probablemente sea el primer mes declarado en el sistema.
+- Las coordenadas son de boca de pozo; la locación desmontada es más grande (en EE. UU. miden 50–250 m, o sea 5–25 píxeles en Sentinel-2).
+- La agrupación por distancia es aproximada: revisar algunos casos a ojo sobre la imagen.
+- 35 pozos sin fecha de primera producción y algunos sin fecha de perforación.
+- **Los puntos no son las etiquetas del modelo:** las máscaras se dibujan sobre la imagen.
+
+## 9. Decisiones tomadas (y alternativas descartadas)
+
+- **Tema:** se evaluaron opciones de seguridad (parches adversariales, backdoors en GTSRB, anti-spoofing, deepfakes, inyección en VLMs) y otras de Vaca Muerta (flaring, derrames, EPP, corrosión, impacto en suelos). Se eligió segmentación de infraestructura por: datos accesibles, problema real y local, y pipeline completo. **Plan B** si el profesor no lo aprueba: backdoors sobre GTSRB (clasificación de señales de tránsito).
+- **Enfoque comercial** (inteligencia de mercado), no ambiental. El ambiental queda como aplicación secundaria.
+- **Backtesting sobre 2019–2023** en lugar de tiempo real: hay fechas oficiales de perforación para validar.
+- **Sentinel-2** (gratis, histórico) en lugar de imágenes de alta resolución pagas.
+- **Sin caminos** como clase.
+- **División espacial por bloques + test externo**, en lugar de división aleatoria.
+
+## 10. Riesgos
+
+- **Resolución:** las locaciones chicas ocupan pocos píxeles.
+- **Confusión con suelo natural:** la estepa ya es medio pelada (motiva H1).
+- **Tiempo de etiquetado:** es la tarea más larga. Medir con 10 recortes antes de planificar.
+- **Sobredimensionar:** si falta tiempo, recortar primero el backtesting o la clase `pileta`, nunca la evaluación del modelo.
+
+## 11. Próximos pasos
+
+- [x] Conseguir datos oficiales de pozos con coordenadas y fechas
+- [x] Armar dataset de locaciones, zonas y splits
+- [ ] Abrir `locaciones_vaca_muerta.geojson` sobre Sentinel-2 y confirmar a ojo que las locaciones se distinguen (comparar 2019 vs. 2023 en Loma Campana)
+- [ ] Etiquetar 10 recortes con SAM y medir el tiempo
+- [ ] Consultar al profesor el número de imágenes etiquetadas y aprobar el tema
+- [ ] Buscar 1–2 papers extra de segmentación en Sentinel-2
+- [ ] Descargar imágenes y armar recortes por split
