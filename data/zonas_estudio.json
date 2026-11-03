@@ -1,0 +1,33 @@
+{
+ "anelo_train_val_test": {
+  "lon_min": -68.85,
+  "lon_max": -68.5,
+  "lat_min": -38.42,
+  "lat_max": -38.12
+ },
+ "test_externo": {
+  "lon_min": -69.25,
+  "lon_max": -68.95,
+  "lat_min": -38.6,
+  "lat_max": -38.3
+ },
+ "n_bloques": 4,
+ "semilla": 3,
+ "split_por_bloque": {
+  "12": "test_anelo",
+  "10": "test_anelo",
+  "15": "test_anelo",
+  "3": "test_anelo",
+  "14": "test_anelo",
+  "1": "val",
+  "11": "val",
+  "2": "train",
+  "5": "train",
+  "8": "train",
+  "7": "train",
+  "13": "train",
+  "6": "train",
+  "4": "train",
+  "9": "train"
+ }
+}

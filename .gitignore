@@ -7,6 +7,13 @@ __pycache__/
 # Datos y resultados pesados: no se suben al repo
 data/*
 !data/.gitkeep
+# Insumos livianos que sí se versionan
+!data/armar_dataset.py
+!data/zonas_estudio.json
+!data/pozos_vaca_muerta.csv
+!data/pozos_vaca_muerta.geojson
+!data/locaciones_vaca_muerta.csv
+!data/locaciones_vaca_muerta.geojson
 runs/
 *.pt
 *.pth
