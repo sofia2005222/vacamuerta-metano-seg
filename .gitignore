@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+*.egg-info/
+
+# Datos y resultados pesados: no se suben al repo
+data/*
+!data/.gitkeep
+runs/
+*.pt
+*.pth
+*.tif
+*.tiff
+*.zip
+*.gpkg

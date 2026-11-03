@@ -1,0 +1,29 @@
+# Núcleo (datos, métricas, tiling)
+numpy
+scipy
+pandas
+pyyaml
+tqdm
+matplotlib
+rasterio
+geopandas
+shapely
+pyproj
+
+# Entrenamiento (en Colab/Kaggle torch ya viene instalado)
+torch
+torchvision
+segmentation-models-pytorch
+
+# Descarga de Sentinel-2 desde un catálogo STAC público
+pystac-client
+stackstac
+xarray
+dask
+pystac
+
+# Tests
+pytest
+
+# Opcional: refinar etiquetas débiles con SAM (ver docs/LABELING.md)
+# transformers
