@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vmseg"
+version = "0.1.0"
+description = "Alerta temprana de locaciones en Vaca Muerta con Sentinel-2"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy<2.4",
+  "pandas",
+  "scikit-learn",
+  "matplotlib",
+  "tqdm",
+  "torch",
+  "torchvision",
+  "torchinfo",
+  "segmentation-models-pytorch",
+  "rasterio",
+  "geopandas",
+]
+
+[project.optional-dependencies]
+gee = ["earthengine-api"]
+sam = ["segment-geospatial"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

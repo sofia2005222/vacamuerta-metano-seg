@@ -21,3 +21,4 @@ runs/
 *.tiff
 *.zip
 *.gpkg
+.venv/
