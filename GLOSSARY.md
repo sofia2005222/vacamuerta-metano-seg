@@ -13,7 +13,7 @@ Punto en superficie donde está el pozo; es la coordenada que da el padrón.
 _Avoid_: cabeza de pozo, ubicación del pozo
 
 **Locación**:
-Superficie de tierra desmontada por la operadora para alojar uno o más pozos, terminada o todavía en obra; es lo que se ve desde el satélite y una de las clases a segmentar.
+Superficie de tierra desmontada por la operadora para alojar uno o más pozos, terminada o todavía en obra, de cualquier formación y esté o no en nuestro dataset; es lo que se ve desde el satélite y una de las clases a segmentar.
 _Avoid_: pad, well pad, playón, locación de producción, sitio
 
 **Pileta**:
@@ -39,19 +39,23 @@ Primer mes con producción declarada de un pozo en el padrón; no se usa como re
 _Avoid_: puesta en producción, fecha de producción
 
 **Locación nueva**:
-Locación cuyo primer pozo empezó a perforarse entre 2019 y 2023; son los casos del backtesting.
+Locación de Vaca Muerta cuyo primer pozo empezó a perforarse entre julio de 2019 y diciembre de 2023; las de `test_anelo` y `test_externo` son los casos del backtesting. Empieza en julio para que haya al menos 6 meses de imágenes antes de la perforación.
 _Avoid_: locación reciente, pad nuevo
 
 **Locación ampliada**:
 Locación a la que se agregaron pozos más de un año después del primero; sigue siendo una sola locación y su fecha de referencia es la de su primer pozo.
 _Avoid_: reampliación, re-entry
 
+**Objeto predicho**:
+En el backtesting, cada componente conexo de los píxeles que el modelo predice como locación o pileta, tomadas juntas.
+_Avoid_: detección, blob
+
 **Locación capturada**:
-Locación del padrón que queda adentro de un objeto predicho de clase locación, contando un margen de 50 m alrededor del objeto.
+Locación del padrón cuyo centro queda adentro de un objeto predicho, contando un margen de 50 m alrededor del objeto.
 _Avoid_: acierto, match, locación encontrada
 
 **Detección sin registro**:
-Objeto predicho de clase locación que no captura ninguna locación del padrón.
+Objeto predicho que no contiene ninguna boca de pozo del padrón completo (cualquier formación, cualquier fecha, incluidos los pozos posteriores a 2023), contando el mismo margen de 50 m.
 _Avoid_: detección nueva (se confunde con locación nueva), falsa alarma
 
 **Locación sin registrar**:
@@ -59,25 +63,37 @@ Detección sin registro que la revisión manual confirma como una locación real
 _Avoid_: locación no declarada, locación ilegal
 
 **Primera detección**:
-El primero de dos meses seguidos en que una locación queda capturada.
+El primero de dos meses seguidos con imagen válida en que una locación queda capturada; los meses sin imagen válida no cuentan ni cortan la racha.
 _Avoid_: aparición, alerta
 
 **Anticipación**:
-Meses entre la primera detección de una locación y el inicio de perforación de su primer pozo.
+Meses entre la primera detección de una locación y el inicio de perforación de su primer pozo; es negativa si la detección llega después.
 _Avoid_: lead time, adelanto, ventaja
 
+**Locación detectada a tiempo**:
+Locación nueva cuya primera detección cae en el mes del inicio de perforación o antes (anticipación ≥ 0).
+_Avoid_: detección temprana, alerta exitosa
+
 **Backtesting**:
-Correr el modelo sobre imágenes históricas (2019–2023) para medir sobre locaciones nuevas cuántas se detectan y con cuánta anticipación.
+Correr el modelo sobre imágenes mensuales históricas (2019–2023) para medir, sobre las locaciones nuevas de los dos test, cuántas se detectan y con cuánta anticipación.
 _Avoid_: validación histórica, simulación
 
 ## Datos y evaluación
 
 **Padrón de pozos**:
-Registro oficial de pozos de la Secretaría de Energía (Capítulo IV), con coordenadas y fechas.
+Registro oficial de pozos de la Secretaría de Energía (Capítulo IV), con coordenadas y fechas, de todas las formaciones; las locaciones de Vaca Muerta son un subconjunto.
 _Avoid_: registro oficial, shapefile de pozos, Capítulo IV
 
+**Imagen mensual**:
+Mediana de los píxeles despejados de Sentinel-2 de un mes sobre una zona de estudio.
+_Avoid_: compuesto, mosaico, escena
+
+**Encuadre**:
+Cuadrado fijo de 256×256 px (2,56 km) sobre el terreno, contenido entero en un bloque; no tiene fecha.
+_Avoid_: ventana, lugar, celda
+
 **Recorte**:
-Porción cuadrada de una imagen satelital que es la unidad de etiquetado y de entrada al modelo.
+Un encuadre en una imagen mensual; es la unidad de etiquetado y de entrada al modelo.
 _Avoid_: parche, patch, tile, chip
 
 **Máscara**:
@@ -97,7 +113,7 @@ Zona de estudio al oeste (Fortín de Piedra, Aguada Pichana Este, La Calera), co
 _Avoid_: zona oeste, zona de test
 
 **Bloque**:
-Celda de la grilla de 4×4 en que se divide la Zona Añelo; cada bloque entero pertenece a un solo split.
+Celda de la grilla en que se divide una zona de estudio (4×4 en la Zona Añelo); cada bloque entero pertenece a un solo split y a una sola persona que lo etiqueta. En la Zona externa todos los bloques son `test_externo`.
 _Avoid_: celda, área (y no confundir con área de concesión)
 
 **Split**:
