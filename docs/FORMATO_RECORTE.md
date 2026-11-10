@@ -1,6 +1,6 @@
 # Formato de un par
 
-Contrato entre las tres etapas. Desde [ADR-0011](adr/0011-modelo-bitemporal-siames.md), la unidad es un **par**: un encuadre en dos imágenes mensuales (T1 antes, T2 después) y una máscara de lo que apareció entre los dos. El código está en `src/vmseg/recorte.py`; el soporte de pares está pendiente (el código actual lee recortes sueltos).
+Contrato entre las tres etapas. Desde [ADR-0011](adr/0011-modelo-bitemporal-siames.md), la unidad es un **par**: un encuadre en dos imágenes mensuales (T1 antes, T2 después) y una máscara de lo que apareció entre los dos. El código está en `src/vmseg/par.py` (`guardar_par`, `leer_par`, `leer_indice_pares` y `generar_pares_falsos`).
 
 ## Archivos
 
