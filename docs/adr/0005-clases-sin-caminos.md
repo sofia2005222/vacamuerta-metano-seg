@@ -8,4 +8,4 @@ El modelo segmenta tres clases: fondo, locación y pileta. Los caminos de acceso
 
 ## Consecuencias
 
-- Si falta tiempo, la clase pileta se puede recortar (y el problema queda binario).
+- Si falta tiempo, la clase pileta se puede recortar (y el problema queda binario). En ese caso las piletas ya validadas en las máscaras pasan a ser **locación**, sin volver a etiquetar nada, así el modelo no aprende a ignorar las superficies excavadas.

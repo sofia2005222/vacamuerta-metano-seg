@@ -35,7 +35,7 @@ Los `.geojson` se abren directo en QGIS o Google Earth Engine.
 | `fecha_ultimo_pozo` | Inicio de perforación del último pozo |
 | `primera_produccion` | Primer mes con producción declarada (ver advertencias) |
 | `anio_primer_pozo` | Año del primer pozo |
-| `nueva_2019_2023` | `True` si el primer pozo es de 2019–2023 (casos del backtesting) |
+| `nueva_2019_2023` | `True` si el primer pozo es de 2019–2023. **Pendiente:** la locación nueva ahora arranca en julio de 2019 (ver `GLOSSARY.md`); hay que ajustar la columna en `armar_dataset.py` |
 | `ampliada_luego` | `True` si se agregaron pozos más de un año después del primero: la locación ya existía en la fecha del pozo agregado |
 | `en_zona_anelo`, `en_zona_test_externo` | Pertenencia a cada zona |
 | `bloque_anelo` | Bloque de la grilla 4×4 (solo zona Añelo) |
@@ -48,4 +48,5 @@ Los `.geojson` se abren directo en QGIS o Google Earth Engine.
 - La agrupación por distancia es aproximada: una locación con varias filas de pozos puede quedar partida en dos. Cuando eso se ve al validar máscaras, se anota en `data/correcciones_locaciones.csv` ("la locación X y la Y son la misma") y `armar_dataset.py` aplica las correcciones al regenerar.
 - 35 pozos sin fecha de primera producción y algunos sin fecha de perforación.
 - **Los puntos no son las etiquetas del modelo:** las máscaras se dibujan sobre la imagen.
+- **Solo Vaca Muerta no convencional:** las locaciones de pozos convencionales o de otras formaciones no están en estos archivos, pero se ven igual desde el satélite y van en las máscaras. **Pendiente:** `armar_dataset.py` tiene que exportar también una capa con todas las bocas de pozo del padrón (todas las formaciones y fechas) para clasificar las detecciones sin registro.
 
