@@ -22,3 +22,4 @@ runs/
 *.zip
 *.gpkg
 .venv/
+.DS_Store
