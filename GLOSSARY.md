@@ -42,12 +42,16 @@ _Avoid_: puesta en producción, fecha de producción
 Locación de Vaca Muerta cuyo primer pozo empezó a perforarse entre julio de 2019 y diciembre de 2023; las de `test_anelo` y `test_externo` son los casos del backtesting. Empieza en julio para que haya al menos 6 meses de imágenes antes de la perforación.
 _Avoid_: locación reciente, pad nuevo
 
+**Locación preexistente**:
+Locación que el padrón marca como nueva pero que ya estaba desmontada en enero de 2019, el primer mes de las imágenes; sale del dataset y del backtesting.
+_Avoid_: locación vieja, falsa nueva
+
 **Locación ampliada**:
 Locación a la que se agregaron pozos más de un año después del primero; sigue siendo una sola locación y su fecha de referencia es la de su primer pozo.
 _Avoid_: reampliación, re-entry
 
 **Objeto predicho**:
-En el backtesting, cada componente conexo de los píxeles que el modelo predice como locación o pileta, tomadas juntas.
+En el backtesting, cada componente conexo de los píxeles que el modelo predice como locación o pileta (nuevas en el par), tomadas juntas.
 _Avoid_: detección, blob
 
 **Locación capturada**:
@@ -93,15 +97,19 @@ Cuadrado fijo de 256×256 px (2,56 km) sobre el terreno, contenido entero en un 
 _Avoid_: ventana, lugar, celda
 
 **Recorte**:
-Un encuadre en una imagen mensual; es la unidad de etiquetado y de entrada al modelo.
+Un encuadre en una imagen mensual.
 _Avoid_: parche, patch, tile, chip
 
+**Par**:
+Un encuadre en dos imágenes mensuales, una antes (T1) y otra después (T2); es la unidad de etiquetado y de entrada al modelo.
+_Avoid_: pareja, imagen bitemporal, par de imágenes
+
 **Máscara**:
-Etiqueta validada por una persona que asigna a cada píxel de un recorte una clase (fondo, locación o pileta).
+Etiqueta validada por una persona que asigna a cada píxel de un par una clase según lo que apareció entre T1 y T2: fondo, locación o pileta; lo que ya estaba en T1 es fondo.
 _Avoid_: anotación, ground truth, etiqueta débil
 
 **Máscara propuesta**:
-Máscara generada automáticamente que todavía no validó ninguna persona.
+Máscara generada automáticamente (con SAM sobre T2) que todavía no validó ninguna persona.
 _Avoid_: pre-etiqueta, máscara automática, borrador
 
 **Zona Añelo**:
@@ -117,5 +125,5 @@ Celda de la grilla en que se divide una zona de estudio (4×4 en la Zona Añelo)
 _Avoid_: celda, área (y no confundir con área de concesión)
 
 **Split**:
-Conjunto al que pertenece un recorte o una locación: `train`, `val`, `test_anelo` o `test_externo`.
+Conjunto al que pertenece un par o una locación: `train`, `val`, `test_anelo` o `test_externo`.
 _Avoid_: partición, fold

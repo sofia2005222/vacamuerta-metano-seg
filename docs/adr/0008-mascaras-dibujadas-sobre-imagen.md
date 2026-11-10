@@ -4,6 +4,8 @@ status: accepted
 
 # Las etiquetas son máscaras sobre la imagen, propuestas por SAM y validadas a mano
 
+> **Modificado por [ADR-0011](0011-modelo-bitemporal-siames.md).** La máscara ahora es de un par y marca solo lo que apareció entre T1 y T2. Se mantiene lo demás: SAM arma la máscara propuesta (sobre T2, con el centro de la locación del padrón como clic) y una persona la valida en todos los splits.
+
 Las etiquetas del modelo son máscaras sobre la imagen, en **todos** los splits. Las arma SAM y las personas solo las validan y corrigen: para cada locación del padrón, su centro sirve como clic de SAM, que propone el contorno (máscara propuesta). Los puntos del padrón solo indican **dónde buscar**, nunca son la etiqueta. Es un cambio respecto de la versión 1, que entrenaba con etiquetas débiles (un disco alrededor de cada boca de pozo). Con etiquetas débiles no se puede aprender la clase pileta, porque el padrón no tiene piletas. Meta inicial: 200–400 recortes de 256×256 px; hay que consultar el número con el profesor.
 
 ## Opciones consideradas
