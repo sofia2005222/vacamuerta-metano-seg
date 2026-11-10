@@ -13,7 +13,7 @@ Entrenar una red neuronal que **segmente locaciones petroleras y piletas en imá
 | Documento | Contenido |
 |---|---|
 | [`GLOSSARY.md`](GLOSSARY.md) | Vocabulario del proyecto (locación, pileta, anticipación, bloque, split…) |
-| [`docs/adr/`](docs/adr/) | Decisiones tomadas, una por archivo (tema, enfoque comercial, Sentinel-2, clases, splits, fecha de referencia, etiquetado, reescritura, Earth Engine) |
+| [`docs/adr/`](docs/adr/) | Decisiones tomadas, una por archivo (tema, enfoque comercial, Sentinel-2, clases, splits, fecha de referencia, etiquetado, reescritura, Earth Engine, modelo bitemporal) |
 | [`docs/PREGUNTAS_ABIERTAS.md`](docs/PREGUNTAS_ABIERTAS.md) | Contradicciones y huecos pendientes; es el insumo para `/grill-with-docs` |
 | [`docs/PROBLEMA.md`](docs/PROBLEMA.md) | El problema con enfoque empresa, quiénes lo usarían y el referente comercial |
 | [`docs/CONSIGNA.md`](docs/CONSIGNA.md) | Requisitos de la cátedra |
@@ -27,7 +27,7 @@ Entrenar una red neuronal que **segmente locaciones petroleras y piletas en imá
 
 ## Estado
 
-**Todavía no hay código.** El código de la versión 1 (enfoque metano) se borró y el proyecto se reescribe de cero ([ADR-0009](docs/adr/0009-reescribir-de-cero.md)). Antes de programar, todo el trabajo se desglosa en issues de GitHub repartidos entre el equipo. La v1 se puede consultar en el tag `v1-metano`.
+El código de la versión 1 (enfoque metano) se borró y el proyecto se reescribe de cero en `src/vmseg/` ([ADR-0009](docs/adr/0009-reescribir-de-cero.md)). Antes de programar, todo el trabajo se desglosa en issues de GitHub repartidos entre el equipo. La v1 se puede consultar en el tag `v1-metano`.
 
 El dataset de pozos y locaciones ya está armado en `data/`. Para regenerarlo, ver `data/armar_dataset.py` y [`docs/DATASET.md`](docs/DATASET.md).
 

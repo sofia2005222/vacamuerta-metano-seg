@@ -2,12 +2,12 @@
 
 ## Reparto
 
-Cada persona es dueña de una etapa del pipeline. El etiquetado se reparte en partes iguales **por bloques**, así nadie toca los recortes de otra. Informe y póster: cada una escribe la parte de su etapa.
+Cada persona es dueña de una etapa del pipeline. El etiquetado se reparte en partes iguales **por bloques**, así nadie toca los pares de otra. Informe y póster: cada una escribe la parte de su etapa.
 
 | Persona | GitHub | Etapa propia |
 |---|---|---|
-| Sofi | `sofia2005222` | Imágenes y recortes: descarga desde GEE, mediana mensual, recortes por split, correcciones del dataset |
-| Agus | `agusbarrena` | Modelo: U-Net, 3 vs. 6 bandas (H1), desde cero / encoder congelado / fine-tuning (H2), curvas de entrenamiento |
+| Sofi | `sofia2005222` | Imágenes y recortes: descarga desde GEE, mediana mensual, pares por split, correcciones del dataset |
+| Agus | `agusbarrena` | Modelo: siamesa y fusión temprana (H4), RGB / 6 bandas / 6 + índices (H1), desde cero / encoder congelado / fine-tuning (H2), curvas de entrenamiento |
 | Bian | `biancapaz` | Evaluación y backtesting: métricas por píxel y por objeto, matriz de confusión, test externo (H3), backtesting, revisión de detecciones sin registro |
 
 La carga tiene que quedar pareja. Si una etapa queda más liviana, Sofi toma lo que sobre.
