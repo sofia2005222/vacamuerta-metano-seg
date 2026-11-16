@@ -135,9 +135,14 @@ if ruta_elegida:
         padron.setLabelsEnabled(True)
         proyecto.addMapLayer(padron)
 
+    # el mapa en el CRS de los pares (UTM 19S) y centrado en el par: si no, QGIS toma el del
+    # padrón (lon/lat) y el par queda chiquito en un mapa de toda la provincia
+    proyecto.setCrs(t2.crs())
+    lienzo = iface.mapCanvas()
+    lienzo.setDestinationCrs(t2.crs())
+    lienzo.setExtent(t2.extent())
+    lienzo.refresh()
     if mascara is not None:
         iface.setActiveLayer(mascara)
-    iface.mapCanvas().setExtent(t2.extent())
-    iface.mapCanvas().refresh()
     proyecto.write(f"{base}.qgz")
     print("Proyecto guardado:", f"{base}.qgz")
