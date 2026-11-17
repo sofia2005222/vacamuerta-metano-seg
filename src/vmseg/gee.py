@@ -12,6 +12,12 @@ import pandas as pd
 S2 = "COPERNICUS/S2_SR_HARMONIZED"
 CLOUD_SCORE_PLUS = "GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED"
 
+BANDA_NUBES = "cs_cdf"
+UMBRAL_NUBES = 0.60
+BANDAS = ["B2", "B3", "B4", "B8", "B11", "B12"]
+BUCKET = "vmseg-imagenes"
+CRS = "EPSG:32719"   # UTM 19 sur, el del mosaico T19HET
+
 # nombre de la zona -> clave en data/zonas_estudio.json
 ZONAS = {"anelo": "anelo_train_val_test", "externa": "test_externo"}
 
@@ -68,3 +74,35 @@ def tabla_cobertura(ids_s2, ids_cs, inicio, fin):
     )
     tabla["sin_cloudscore"] = tabla["escenas_s2"] - tabla["con_cloudscore"]
     return tabla
+
+
+def escenas_mes(ee, zona, mes):
+    """Escenas de Sentinel-2 de un mes ('2021-07') en una zona, con la banda de Cloud Score+."""
+    geom = ee.Geometry.Rectangle(list(recuadro(zona)))
+    inicio = ee.Date(f"{mes}-01")
+    fin = inicio.advance(1, "month")
+    escenas = ee.ImageCollection(S2).filterBounds(geom).filterDate(inicio, fin)
+    return escenas.linkCollection(ee.ImageCollection(CLOUD_SCORE_PLUS), [BANDA_NUBES])
+
+def imagen_mensual(ee, zona, mes):
+    """Mediana de los píxeles despejados del mes, con las 6 bandas de BANDAS."""
+
+    def despejada(img):
+        return img.updateMask(img.select(BANDA_NUBES).gte(UMBRAL_NUBES))
+
+    return escenas_mes(ee, zona, mes).map(despejada).median().select(BANDAS)
+
+def exportar_mes(ee, zona, mes, bucket=BUCKET):
+    """Lanza la exportación de la imagen mensual a gs://<bucket>/<zona>/<mes>.tif."""
+    tarea = ee.batch.Export.image.toCloudStorage(
+        image=imagen_mensual(ee,zona,mes).toUint16(),            
+        description=f"{zona}_{mes}",      
+        bucket=bucket,
+        fileNamePrefix=f"{zona}/{mes}",   
+        region=ee.Geometry.Rectangle(list(recuadro(zona))),           
+        scale=10,
+        crs=CRS,
+        maxPixels=1e9,
+    )
+    tarea.start()
+    return tarea

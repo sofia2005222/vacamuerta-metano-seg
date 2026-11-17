@@ -20,4 +20,7 @@ El primer issue de código define el **formato de un recorte** (archivo, bandas,
 - **Notebooks:** solo para correr y mostrar. Clonan el repo y llaman a las funciones de los `.py`.
 - **Cómputo:** lo que no necesita GPU (datos, etiquetado, evaluación) corre en una compu local (alcanzan 16 GB de RAM). El entrenamiento corre en Colab con GPU: cada una usa su cuenta gratis y, si el límite de horas molesta, se pasa a Colab Enterprise pagado con créditos.
 - **Almacenamiento:** las imágenes mensuales (~14 GB) van a un bucket de Google Cloud Storage en el proyecto de Sofi; GEE exporta directo ahí y las tres tienen acceso de lectura.
+- **Bucket:** `gs://vmseg-imagenes` (proyecto `tp-final-cv-514618`, región `southamerica-east1`). Una imagen por zona y mes: `anelo/2021-07.tif`, `externa/2021-07.tif`. Sofi escribe; Agus y Bian leen con su cuenta de UdeSA.
+  - Desde Colab: `from google.colab import auth; auth.authenticate_user()` y después `!gsutil ls gs://vmseg-imagenes` o `!gsutil cp gs://vmseg-imagenes/anelo/2021-07.tif .`
+  - Desde la compu: bajar los archivos en <https://console.cloud.google.com/storage/browser/vmseg-imagenes>, entrando con la cuenta de UdeSA.
 - **Créditos:** USD 50 de Google Cloud por persona (USD 150 en total). El bucket cuesta centavos por mes; el resto queda para Colab Enterprise si hace falta.
