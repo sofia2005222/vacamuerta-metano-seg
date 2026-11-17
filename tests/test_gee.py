@@ -30,3 +30,29 @@ def test_tabla_cobertura_cuenta_por_mes_e_incluye_meses_vacios():
 def test_tabla_cobertura_ignora_escenas_fuera_de_rango():
     t = tabla_cobertura(["20240101T000000_x_T19HEB"], [], "2019-01-01", "2019-02-01")
     assert t["escenas_s2"].sum() == 0
+
+
+def test_meses_del_periodo_son_60():
+    from vmseg.exportar import meses
+
+    m = meses()
+    assert len(m) == 60
+    assert (m[0], m[1], m[-1]) == ("2019-01", "2019-02", "2023-12")
+
+
+def test_tabla_indice_marca_los_meses_malos_y_ordena():
+    from vmseg.indice import tabla_indice
+
+    filas = [
+        ("externa", "2019-02", 10, 100.0, 2),
+        ("anelo", "2019-02", 12, 80.126, 0),
+        ("anelo", "2019-01", 13, 99.5, 3),
+    ]
+
+    t = tabla_indice(filas, umbral=99.0, min_despejadas=3)
+
+    assert list(t["zona"]) == ["anelo", "anelo", "externa"]
+    assert list(t["mes"]) == ["2019-01", "2019-02", "2019-02"]
+    assert list(t["pct_validos"]) == [99.5, 80.13, 100.0]
+    assert list(t["nublado"]) == [False, True, False]
+    assert list(t["pocas_despejadas"]) == [False, True, True]

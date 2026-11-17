@@ -14,6 +14,7 @@ data/*
 !data/pozos_vaca_muerta.geojson
 !data/locaciones_vaca_muerta.csv
 !data/locaciones_vaca_muerta.geojson
+!data/indice_imagenes.csv
 runs/
 *.pt
 *.pth
