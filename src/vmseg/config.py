@@ -16,7 +16,8 @@ class DatasetConfig:
         num_classes=3,
         batch_size=8,
         num_workers=2,
-        augment=False
+        augment=False,
+        indices=False #True: Agrega NDVI, NDBI y BSI como canales
     ):
         self.data_root = data_root
         self.bandas = list(bandas)
@@ -24,6 +25,7 @@ class DatasetConfig:
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.augment = augment
+        self.indices = indices
 
 
 class TrainingConfig:
