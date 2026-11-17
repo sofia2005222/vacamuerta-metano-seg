@@ -106,3 +106,29 @@ def exportar_mes(ee, zona, mes, bucket=BUCKET):
     )
     tarea.start()
     return tarea
+
+def validos_mes(ee, zona, mes, escala=10):
+    """
+    (escenas, pct_validos, min_despejadas) de la imagen mensual de una zona.
+
+    `pct_validos` es el porcentaje de píxeles de la zona con al menos una
+    observación despejada en el mes: los que no quedan tapados en la mediana.
+    `min_despejadas` es la menor cantidad de observaciones despejadas que tiene
+    un píxel: con 1 o 2, la mediana puede dejar pasar una sombra o bruma.
+    """
+    escenas = escenas_mes(ee, zona, mes)
+    n_escenas = escenas.size().getInfo()
+    if n_escenas == 0:
+        return 0, 0.0, 0
+    geom = ee.Geometry.Rectangle(list(recuadro(zona)))
+    donde = dict(geometry=geom, scale=escala, crs=CRS, maxPixels=1e9)
+
+    def despejada(img):
+        return img.select(BANDA_NUBES).gte(UMBRAL_NUBES).unmask(0)
+
+    validos = imagen_mensual(ee, zona, mes).select(BANDAS[0]).mask().rename("validos")
+    despejadas = escenas.map(despejada).sum().rename("despejadas")
+    r = ee.Dictionary(validos.reduceRegion(reducer=ee.Reducer.mean(), **donde)).combine(
+        despejadas.reduceRegion(reducer=ee.Reducer.min(), **donde)
+    ).getInfo()
+    return n_escenas, 100 * r["validos"], int(r["despejadas"])
