@@ -19,6 +19,7 @@ dependencies = [
   "segmentation-models-pytorch",
   "rasterio",
   "geopandas",
+  "albumentations",
 ]
 
 [project.optional-dependencies]
