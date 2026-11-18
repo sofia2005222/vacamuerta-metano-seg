@@ -43,6 +43,16 @@ MARGEN_NEGATIVOS = 150  # m alrededor del encuadre: una locación de afuera pued
 TOTAL_NEGATIVOS = 130  # meta provisoria (docs/METODO.md)
 SEMILLA = 11
 
+# Quién etiqueta cada bloque: {zona: {persona: [bloques]}}. Cada bloque entero es de una
+# sola persona. Se eligió con una búsqueda local que empareja el total (100/99/99), los
+# positivos (56 cada una) y cada split entre las tres, para que la forma de marcar de
+# una no quede concentrada en un split (val tiene solo 2 bloques: a Bian no le toca y
+# lleva más test_anelo). Queda fijo para que no cambie al regenerar el índice.
+REPARTO = {
+    "anelo": {"sofi": [6, 7, 10, 11], "agus": [0, 1, 2, 3, 4, 13], "bian": [5, 8, 9, 12, 14, 15]},
+    "externa": {"sofi": [0, 2, 3, 9, 11], "agus": [4, 7, 8, 10], "bian": [1, 5, 6]},
+}
+
 
 def locaciones_nuevas(zona, ruta=RUTA_LOCACIONES):
     """Locaciones nuevas de una zona, con x, y en metros del CRS de las imágenes."""
@@ -215,6 +225,8 @@ def armar_indice(semilla=SEMILLA):
         for z in ZONAS
     ]
     indice = anotar_meses_dudosos(pd.concat([positivos, *negativos], ignore_index=True), invalidos)
+    responsable = {(z, b): p for z, personas in REPARTO.items() for p, bloques in personas.items() for b in bloques}
+    indice["responsable"] = [responsable[(z, b)] for z, b in zip(indice["zona"], indice["bloque"])]
     return indice.sort_values(["zona", "bloque", "encuadre", "mes_t1"], ignore_index=True)
 
 

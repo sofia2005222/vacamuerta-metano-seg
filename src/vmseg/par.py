@@ -21,7 +21,7 @@ from vmseg.recorte import (
 
 COLUMNAS_INDICE_PARES = [
     "id", "encuadre", "locacion_id", "zona", "bloque", "split",
-    "mes_t1", "mes_t2", "x_min", "y_max", "crs", "validada", "nota",
+    "mes_t1", "mes_t2", "x_min", "y_max", "crs", "validada", "nota", "responsable",
 ]
 
 def guardar_tif(ruta, datos, x_min, y_max, crs, dtype):

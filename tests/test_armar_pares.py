@@ -143,6 +143,19 @@ def test_indice_real():
     assert idx.groupby("encuadre")["locacion_id"].apply(lambda s: (s == -1).sum()).max() == 1
 
 
+def test_reparto_cubre_todos_los_bloques_una_vez_y_queda_parejo():
+    from vmseg.armar_pares import REPARTO
+    from vmseg.encuadres import bloques
+    for zona, personas in REPARTO.items():
+        asignados = sorted(b for bs in personas.values() for b in bs)
+        assert asignados == sorted(bloques(zona))
+    idx = armar_indice()
+    assert idx["responsable"].notna().all()
+    por_persona = idx["responsable"].value_counts()
+    assert por_persona.max() - por_persona.min() <= 3
+    assert (idx.groupby("responsable")["split"].nunique() >= 3).all()
+
+
 def test_anotar_meses_dudosos_con_indice_repetido_no_mezcla_notas():
     # Al juntar tablas con pd.concat los índices se repiten: la nota no tiene que pasar a otra fila.
     a = pd.DataFrame(dict(zona=["anelo"], mes_t1=["2020-07"], mes_t2=["2021-02"], nota=[""]))

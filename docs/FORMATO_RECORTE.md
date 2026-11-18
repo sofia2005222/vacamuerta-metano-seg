@@ -61,6 +61,7 @@ Una fila por par.
 | `crs` | `EPSG:32719` | CRS de las coordenadas |
 | `validada` | `True` | Si una persona ya validó la máscara (si no, es una máscara propuesta) |
 | `nota` | | Texto libre |
+| `responsable` | `sofi` | Quién valida el par: `sofi`, `agus` o `bian` (cada bloque entero es de una sola, ver `REPARTO` en `src/vmseg/armar_pares.py`) |
 
 ## Pares falsos
 
