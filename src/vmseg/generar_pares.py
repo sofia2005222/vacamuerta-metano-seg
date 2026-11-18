@@ -211,18 +211,20 @@ def archivos_del_par(id_par):
     return [f"{id_par}{s}" for s in SUFIJOS_PAQUETE] + [f"{CONTEXTO}/{id_par}_t2_contexto.tif"]
 
 
-def archivos_a_subir(ids, en_bucket, locales, regenerados=()):
+def archivos_a_subir(ids, en_bucket, locales, regenerados=(), propuestas_nuevas=()):
     """
-    Archivos de los pares a subir: los que existen localmente, salvo la máscara y la propuesta
-    que ya están en el bucket (pueden estar validadas), que solo se reemplazan en los pares
-    `regenerados` (pedidos por id). Tampoco se resube lo que no cambia (T1, T2, contexto).
+    Archivos de los pares a subir: los que existen localmente y no están en el bucket. Lo que ya
+    está (la máscara y la propuesta pueden estar validadas) solo se reemplaza en los pares
+    `regenerados` (pedidos por id: el par entero) y, para la propuesta y la caída de NDVI, en los
+    pares de `propuestas_nuevas` (proponer --todos).
     """
+    rehechos = ("_propuesta.gpkg", "_dndvi.tif")
     elegidos = []
     for i in ids:
         for f in archivos_del_par(i):
             if f not in locales:
                 continue
-            if f in en_bucket and i not in regenerados:
+            if f in en_bucket and i not in regenerados and not (i in propuestas_nuevas and f.endswith(rehechos)):
                 continue
             elegidos.append(f)
     return elegidos
@@ -237,11 +239,11 @@ def _en_bucket(b):
     return {bl.name[len(PREFIJO) + 1:] for bl in b.list_blobs(prefix=f"{PREFIJO}/")}
 
 
-def subir(indice, carpeta=CARPETA, regenerados=()):
+def subir(indice, carpeta=CARPETA, regenerados=(), propuestas_nuevas=()):
     """Sube a gs://<bucket>/pares/ los archivos de los pares (ver archivos_a_subir) y los paquetes."""
     b = bucket()
     en_bucket, locales = _en_bucket(b), _locales(carpeta)
-    archivos = archivos_a_subir(indice["id"], en_bucket, locales, regenerados)
+    archivos = archivos_a_subir(indice["id"], en_bucket, locales, regenerados, propuestas_nuevas)
     archivos += sorted(f for f in locales if f.startswith(f"{PAQUETES}/"))
     for n, f in enumerate(archivos, 1):
         b.blob(f"{PREFIJO}/{f}").upload_from_filename(os.path.join(carpeta, f))
@@ -292,6 +294,8 @@ def _main(argv=None):
     p = argparse.ArgumentParser(prog="python -m vmseg.generar_pares")
     p.add_argument("paso", choices=["recortar", "proponer", "empaquetar", "subir", "bajar", "estado"])
     p.add_argument("ids", nargs="*", help="solo estos pares")
+    p.add_argument("--todos", action="store_true",
+                   help="proponer: rehace también las propuestas que ya existen; subir: las reemplaza en el bucket")
     args = p.parse_args(argv)
 
     os.makedirs(CARPETA, exist_ok=True)
@@ -308,13 +312,13 @@ def _main(argv=None):
             elegidos = indice[[not os.path.exists(os.path.join(CARPETA, f"{i}_t2.tif")) for i in indice["id"]]]
         recortar(elegidos, env=entorno_gdal())
     elif args.paso == "proponer":
-        if not args.ids:
+        if not args.ids and not args.todos:
             elegidos = indice[[not os.path.exists(os.path.join(CARPETA, f"{i}_propuesta.gpkg")) for i in indice["id"]]]
         proponer_todos(elegidos)
     elif args.paso == "empaquetar":
         empaquetar(elegidos)
     elif args.paso == "subir":
-        subir(elegidos, regenerados=set(args.ids))
+        subir(elegidos, regenerados=set(args.ids), propuestas_nuevas=set(elegidos["id"]) if args.todos else ())
     elif args.paso == "bajar":
         bajar(elegidos)
     else:

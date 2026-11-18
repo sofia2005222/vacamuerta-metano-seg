@@ -104,6 +104,8 @@ python -m vmseg.generar_pares subir           # sube los zips (no pisa máscaras
 python -m vmseg.generar_pares estado          # baja las máscaras y cuenta las validadas
 ```
 
+Si cambia el generador de propuestas, `proponer --todos` y `subir --todos` (en el notebook, `TODOS = "--todos"`) rehacen y reemplazan todas las propuestas sin tocar las máscaras; antes de `bajar`, borrá las `_propuesta.gpkg` y `_dndvi.tif` locales para traer las nuevas.
+
 Para regenerar pares corregidos: `recortar <id>`, `proponer <id>` (en la compu tarda ~2 min por par sin GPU) y `subir <id>`.
 
 SAM necesita `segment-anything` y el checkpoint `sam_vit_h_4b8939.pth` en `~/.cache/sam/` (https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth).

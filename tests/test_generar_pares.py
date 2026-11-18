@@ -102,3 +102,6 @@ def test_subir_no_pisa_lo_que_ya_esta_en_el_bucket_y_sube_solo_lo_local():
     assert archivos_a_subir(["a"], en_bucket, locales) == ["a_t2.tif", "contexto/a_t2_contexto.tif"]
     # Un par regenerado (pedido por id) sí se reemplaza entero, con lo que haya localmente.
     assert len(archivos_a_subir(["a"], en_bucket, locales, regenerados={"a"})) == 5
+    # Propuestas rehechas (proponer --todos): se reemplaza la propuesta, nunca la máscara.
+    assert archivos_a_subir(["a"], en_bucket, locales, propuestas_nuevas={"a"}) == [
+        "a_t2.tif", "a_propuesta.gpkg", "contexto/a_t2_contexto.tif"]
