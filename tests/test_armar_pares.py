@@ -40,3 +40,71 @@ def test_pares_positivos_un_par_por_locacion():
     assert list(p["mes_t2"]) == ["2021-04", "2020-02"]
     assert (p["split"] == "train").all() and not p["validada"].any()
     assert list(p["x_min"]) == [2000, 0]
+
+
+# --- Negativos ---
+
+from vmseg.armar_pares import cantidades_por_split, meses_t1_posibles, pares_negativos  # noqa: E402
+
+ENCUADRE = ENCUADRES.iloc[0]  # x de 0 a 2560, y de 0 a 2560
+SIN_POZOS = pd.DataFrame(dict(x=[], y=[], mes=pd.PeriodIndex([], freq="M")))
+
+
+def pozos(*filas):
+    """Pozos de prueba: (x, y, mes o None)."""
+    x, y, mes = zip(*filas)
+    return pd.DataFrame(dict(x=x, y=y, mes=pd.PeriodIndex(mes, freq="M")))
+
+
+def estacion(mes):
+    return {12: 0, 1: 0, 2: 0, 3: 1, 4: 1, 5: 1, 6: 2, 7: 2, 8: 2, 9: 3, 10: 3, 11: 3}[pd.Period(mes).month]
+
+
+def test_cantidades_por_split_proporcional_a_los_positivos():
+    positivos = pd.DataFrame(dict(split=["train"] * 71 + ["val"] * 18 + ["test_anelo"] * 32 + ["test_externo"] * 51))
+    assert cantidades_por_split(positivos, 130) == {"test_anelo": 24, "test_externo": 38, "train": 54, "val": 14}
+
+
+def test_sin_pozos_todos_los_meses_sirven_y_t2_es_7_meses_despues():
+    t1s = meses_t1_posibles(ENCUADRE, SIN_POZOS, set())
+    assert len(t1s) == 53 and t1s[0] == "2019-01" and t1s[-1] == "2023-05"
+
+
+def test_t1_y_t2_caen_siempre_en_estaciones_distintas():
+    for t1 in meses_t1_posibles(ENCUADRE, SIN_POZOS, set()):
+        assert estacion(t1) != estacion(pd.Period(t1) + 7)
+
+
+def test_pozo_a_100_m_del_borde_descarta_los_intervalos_en_que_aparece_su_locacion():
+    # Perforado en marzo de 2021: la locación puede aparecer desde 6 meses antes.
+    # Se descarta todo T1 anterior al pozo con T2 + 6 meses que lo alcance.
+    t1s = meses_t1_posibles(ENCUADRE, pozos((2660, 1280, "2021-03")), set())
+    assert "2020-01" in t1s and "2021-03" in t1s
+    assert "2020-02" not in t1s and "2021-02" not in t1s
+
+
+def test_pozo_a_200_m_del_borde_no_afecta():
+    assert len(meses_t1_posibles(ENCUADRE, pozos((2760, 1280, "2021-03")), set())) == 53
+
+
+def test_pozo_sin_fecha_descarta_el_encuadre():
+    assert meses_t1_posibles(ENCUADRE, pozos((1280, 1280, None)), set()) == []
+
+
+def test_meses_invalidos_no_se_usan_ni_de_t1_ni_de_t2():
+    t1s = meses_t1_posibles(ENCUADRE, SIN_POZOS, {"2020-07"})
+    assert "2020-07" not in t1s and "2019-12" not in t1s and len(t1s) == 51
+
+
+def test_pares_negativos_uno_por_encuadre_y_reproducible():
+    encuadres = pd.DataFrame([
+        dict(encuadre=f"anelo_b05_e{i}", zona="anelo", bloque=5, split="train", x_min=i * 10000, y_max=2560)
+        for i in range(5)
+    ])
+    con_pozo_sin_fecha = pozos((1280, 1280, None))  # cae en e0
+    p = pares_negativos(encuadres, con_pozo_sin_fecha, set(), {"train": 3}, semilla=1)
+    assert len(p) == 3 and p["encuadre"].is_unique
+    assert "anelo_b05_e0" not in set(p["encuadre"])
+    assert (p["locacion_id"] == -1).all() and (p["id"] == p["encuadre"] + "_neg").all()
+    assert (p["mes_t2"].map(pd.Period) - p["mes_t1"].map(pd.Period)).map(lambda d: d.n).eq(7).all()
+    assert p.equals(pares_negativos(encuadres, con_pozo_sin_fecha, set(), {"train": 3}, semilla=1))
