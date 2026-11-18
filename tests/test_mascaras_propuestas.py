@@ -98,6 +98,19 @@ def test_proponer_recorta_al_recorte_dentro_del_contexto():
     assert (poligonos_a_mascara(prop, t, 128, 128) == LOCACION).sum() == 10 * 10
 
 
+def test_proponer_pasa_la_nota_del_padron_a_los_poligonos():
+    # Pozos de otras formaciones: entran al padrón con locacion_id = -1 y una nota para quien valida.
+    t = _transform()
+    img = np.full((6, 64, 64), 0.1, np.float32)
+    region = np.zeros((64, 64), bool)
+    region[10:20, 10:20] = True
+    padron = _padron([xy(t, 15, 15)], ["2021-05-01"])
+    padron["locacion_id"] = -1
+    padron["nota"] = "otra formación"
+    prop = proponer(img, t, CRS, "2021-01", "2021-08", padron, _sam_falso(region))
+    assert list(prop["locacion_id"]) == [-1] and list(prop["nota"]) == ["otra formación"]
+
+
 def test_circuito_completo_con_pares_falsos(tmp_path):
     """proponer_par → (QGIS, acá sin cambios) → validar_par → máscara de cambio en formato de par."""
     indice = generar_pares_falsos(tmp_path, n=4, tamano=64, semilla=3, frac_negativos=0)

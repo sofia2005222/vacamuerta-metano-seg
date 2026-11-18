@@ -111,10 +111,11 @@ def locaciones_nuevas_para_clic(locaciones, transform, crs, alto, ancho, mes_t1,
     meses después del fin de `mes_t2`.
 
     locaciones: GeoDataFrame del padrón (`data/locaciones_vaca_muerta.geojson`), en cualquier CRS.
-    Devuelve un DataFrame con locacion_id, fila, col, fecha_primer_pozo y verificar
-    (1 si el primer pozo es posterior a T2: la locación puede no estar todavía).
+    Si tiene una columna `nota` (por ejemplo, pozos de otras formaciones), pasa a los polígonos.
+    Devuelve un DataFrame con locacion_id, fila, col, fecha_primer_pozo, verificar
+    (1 si el primer pozo es posterior a T2: la locación puede no estar todavía) y nota.
     """
-    columnas = ["locacion_id", "fila", "col", "fecha_primer_pozo", "verificar"]
+    columnas = ["locacion_id", "fila", "col", "fecha_primer_pozo", "verificar", "nota"]
     loc = locaciones[locaciones["fecha_primer_pozo"].notna()].copy()
     loc["fecha"] = pd.to_datetime(loc["fecha_primer_pozo"])
     fin_t1, fin_t2 = _fin_de_mes(mes_t1), _fin_de_mes(mes_t2)
@@ -132,6 +133,7 @@ def locaciones_nuevas_para_clic(locaciones, transform, crs, alto, ancho, mes_t1,
         "col": loc["col"].values,
         "fecha_primer_pozo": loc["fecha"].dt.strftime("%Y-%m-%d").values,
         "verificar": (loc["fecha"] > fin_t2).astype(int).values,
+        "nota": loc["nota"].fillna("").values if "nota" in loc else "",
     }, columns=columnas)
 
 
@@ -214,7 +216,8 @@ def proponer(img_t2, transform, crs, mes_t1, mes_t2, locaciones, segmentar,
         m = np.asarray(segmentar(rgb, int(p.fila), int(p.col)), dtype=bool)
         if not m.any():
             continue
-        nota = "primer pozo posterior a T2: confirmar que se vea" if p.verificar else ""
+        nota = "; ".join(filter(None, [
+            p.nota, "primer pozo posterior a T2: confirmar que se vea" if p.verificar else ""]))
         partes.append(mascara_a_poligonos(m, transform, crs, origen="sam",
                                           locacion_id=int(p.locacion_id),
                                           verificar=int(p.verificar), nota=nota))

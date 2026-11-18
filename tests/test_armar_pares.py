@@ -162,3 +162,23 @@ def test_anotar_meses_dudosos_con_indice_repetido_no_mezcla_notas():
     b = pd.DataFrame(dict(zona=["anelo"], mes_t1=["2020-01"], mes_t2=["2020-06"], nota=[""]))
     notas = anotar_meses_dudosos(pd.concat([a, b]), {"anelo": {"2020-07"}})["nota"].tolist()
     assert notas[0] != "" and notas[1] == ""
+
+
+def test_aplicar_correcciones_corre_t1_o_saca_el_par():
+    from vmseg.armar_pares import aplicar_correcciones
+    idx = pd.DataFrame(dict(id=["a", "b", "c"], mes_t1=["2020-09", "2019-03", "2021-01"],
+                            mes_t2=["2021-04", "2019-10", "2021-08"], nota=["", "", ""]))
+    corr = pd.DataFrame(dict(id=["a", "b", "c"], accion=["t1_menos_12", "t1_menos_12", "preexistente"],
+                             nota=["se veía", "", "ya estaba en 2019-01"]))
+    r = aplicar_correcciones(idx, corr)
+    assert list(r["id"]) == ["a", "b"]
+    assert list(r["mes_t1"]) == ["2020-03", "2019-01"]  # 6 meses antes, sin pasar de enero de 2019
+    assert "T1 corrido" in r["nota"].iloc[0] and "se veía" in r["nota"].iloc[0]
+
+
+def test_aplicar_correcciones_rechaza_accion_desconocida():
+    import pytest
+    from vmseg.armar_pares import aplicar_correcciones
+    idx = pd.DataFrame(dict(id=["a"], mes_t1=["2020-09"], mes_t2=["2021-04"], nota=[""]))
+    with pytest.raises(ValueError):
+        aplicar_correcciones(idx, pd.DataFrame(dict(id=["a"], accion=["borrar"], nota=[""])))

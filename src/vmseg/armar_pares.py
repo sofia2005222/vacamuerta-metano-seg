@@ -35,6 +35,7 @@ RUTA_LOCACIONES = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "locaciones_vaca
 COLUMNA_ZONA = {"anelo": "en_zona_anelo", "externa": "en_zona_test_externo"}
 RUTA_POZOS_TODOS = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "pozos_todos.csv")
 RUTA_INDICE_PARES = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "indice_pares.csv")
+RUTA_CORRECCIONES = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "correcciones_pares.csv")
 ZONAS = ["anelo", "externa"]
 
 SEPARACION_NEGATIVOS = 7  # meses entre T1 y T2, igual que en los positivos
@@ -213,8 +214,35 @@ def anotar_meses_dudosos(pares, invalidos):
     return pares
 
 
-def armar_indice(semilla=SEMILLA):
-    """Positivos y negativos de las dos zonas, ordenados por zona, bloque y encuadre."""
+def aplicar_correcciones(indice, correcciones):
+    """
+    Correcciones que salen de validar (data/correcciones_pares.csv: id, accion, nota):
+      t1_menos_12   la locación ya se veía en T1: T1 pasa de −6 a −12 meses (no antes de enero de 2019)
+      preexistente  la locación ya estaba en enero de 2019: el par sale (se anota para #15)
+    El id del par no cambia; hay que volver a recortarlo y proponerlo (docs/VALIDACION.md).
+    """
+    acciones = {"t1_menos_12", "preexistente"}
+    desconocidas = set(correcciones["accion"]) - acciones
+    if desconocidas:
+        raise ValueError(f"acciones desconocidas en las correcciones: {desconocidas}")
+    indice = indice.copy()
+    for c in correcciones.itertuples():
+        fila = indice["id"] == c.id
+        if c.accion == "preexistente":
+            indice = indice[~fila]
+            continue
+        t1 = max(pd.Period(indice.loc[fila, "mes_t1"].iloc[0], freq="M") - 6, pd.Period(INICIO, freq="M"))
+        indice.loc[fila, "mes_t1"] = str(t1)
+        aviso = "; ".join(filter(None, ["T1 corrido a −12 meses: la locación ya se veía", c.nota]))
+        indice.loc[fila, "nota"] = indice.loc[fila, "nota"].map(lambda n: "; ".join(filter(None, [n, aviso])))
+    return indice.reset_index(drop=True)
+
+
+def armar_indice(semilla=SEMILLA, ruta_correcciones=RUTA_CORRECCIONES):
+    """
+    Positivos y negativos de las dos zonas, ordenados por zona, bloque y encuadre. Las correcciones
+    se aplican al final, para que la cantidad de negativos y cuáles son no cambien.
+    """
     encuadres_z = {z: encuadres(z) for z in ZONAS}
     invalidos = {z: meses_invalidos(z) for z in ZONAS}
     positivos = pd.concat([pares_positivos(locaciones_nuevas(z), encuadres_z[z]) for z in ZONAS])
@@ -227,6 +255,8 @@ def armar_indice(semilla=SEMILLA):
     indice = anotar_meses_dudosos(pd.concat([positivos, *negativos], ignore_index=True), invalidos)
     responsable = {(z, b): p for z, personas in REPARTO.items() for p, bloques in personas.items() for b in bloques}
     indice["responsable"] = [responsable[(z, b)] for z, b in zip(indice["zona"], indice["bloque"])]
+    if os.path.exists(ruta_correcciones):
+        indice = aplicar_correcciones(indice, pd.read_csv(ruta_correcciones, dtype=str).fillna(""))
     return indice.sort_values(["zona", "bloque", "encuadre", "mes_t1"], ignore_index=True)
 
 
