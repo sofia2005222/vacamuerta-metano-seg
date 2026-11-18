@@ -7,6 +7,7 @@ del bucket y deja todo listo para validar (docs/VALIDACION.md).
     python -m vmseg.generar_pares proponer      SAM sobre T2 y caída de NDVI de cada par
     python -m vmseg.generar_pares empaquetar    un zip por responsable con sus pares
     python -m vmseg.generar_pares subir         pares, índice y paquetes a gs://vmseg-imagenes/pares/
+    python -m vmseg.generar_pares bajar         lo que falte en data/pares/ desde el bucket (Colab)
     python -m vmseg.generar_pares estado        bajá las máscaras del bucket y contá las validadas
 
 Todo se guarda en data/pares/ (no se sube al repo). Con ids al final, cada paso hace solo esos
@@ -45,9 +46,19 @@ SUFIJOS_PAQUETE = ["_t1.tif", "_t2.tif", "_mask.tif", "_dndvi.tif", "_propuesta.
 # ---------------------------------------------------------------- bucket
 
 def credenciales():
-    """Credenciales de Earth Engine (incluyen Cloud Storage)."""
-    import ee
-    return ee.data.get_persistent_credentials()
+    """
+    Credenciales de Earth Engine (incluyen Cloud Storage). Si no hay (por ejemplo en Colab,
+    después de `google.colab.auth.authenticate_user()`), las de la cuenta por defecto.
+    """
+    try:
+        import ee
+        cred = ee.data.get_persistent_credentials()
+        if cred is not None:
+            return cred
+    except Exception:
+        pass
+    import google.auth
+    return google.auth.default()[0]
 
 
 def entorno_gdal(cred=None):
@@ -191,27 +202,61 @@ def empaquetar(indice, carpeta=CARPETA):
 EDITABLES = ("_mask.tif", "_propuesta.gpkg")  # los devuelven las que validan
 
 
-def archivos_a_subir(ids, en_bucket, regenerados=()):
+def archivos_del_par(id_par):
+    """Rutas relativas a la carpeta de pares (y al prefijo del bucket) de todos los archivos de un par."""
+    return [f"{id_par}{s}" for s in SUFIJOS_PAQUETE] + [f"{CONTEXTO}/{id_par}_t2_contexto.tif"]
+
+
+def archivos_a_subir(ids, en_bucket, locales, regenerados=()):
     """
-    Archivos de los pares a subir. La máscara y la propuesta que ya están en el bucket no se
-    reemplazan (pueden estar validadas), salvo en los pares `regenerados` (pedidos por id).
+    Archivos de los pares a subir: los que existen localmente, salvo la máscara y la propuesta
+    que ya están en el bucket (pueden estar validadas), que solo se reemplazan en los pares
+    `regenerados` (pedidos por id). Tampoco se resube lo que no cambia (T1, T2, contexto).
     """
-    return [f"{i}{s}" for i in ids for s in SUFIJOS_PAQUETE
-            if not (s in EDITABLES and f"{i}{s}" in en_bucket and i not in regenerados)]
+    elegidos = []
+    for i in ids:
+        for f in archivos_del_par(i):
+            if f not in locales:
+                continue
+            if f in en_bucket and i not in regenerados:
+                continue
+            elegidos.append(f)
+    return elegidos
+
+
+def _locales(carpeta):
+    return {os.path.relpath(os.path.join(r, f), carpeta).replace(os.sep, "/")
+            for r, _, fs in os.walk(carpeta) for f in fs}
+
+
+def _en_bucket(b):
+    return {bl.name[len(PREFIJO) + 1:] for bl in b.list_blobs(prefix=f"{PREFIJO}/")}
 
 
 def subir(indice, carpeta=CARPETA, regenerados=()):
-    """Sube los archivos de cada par y los paquetes a gs://<bucket>/pares/ (ver archivos_a_subir)."""
+    """Sube a gs://<bucket>/pares/ los archivos de los pares (ver archivos_a_subir) y los paquetes."""
     b = bucket()
-    en_bucket = {bl.name[len(PREFIJO) + 1:] for bl in b.list_blobs(prefix=f"{PREFIJO}/")}
-    archivos = archivos_a_subir(indice["id"], en_bucket, regenerados)
-    archivos += [os.path.join(PAQUETES, f) for f in os.listdir(os.path.join(carpeta, PAQUETES))]
+    en_bucket, locales = _en_bucket(b), _locales(carpeta)
+    archivos = archivos_a_subir(indice["id"], en_bucket, locales, regenerados)
+    archivos += sorted(f for f in locales if f.startswith(f"{PAQUETES}/"))
     for n, f in enumerate(archivos, 1):
-        b.blob(f"{PREFIJO}/{f.replace(os.sep, '/')}").upload_from_filename(os.path.join(carpeta, f))
+        b.blob(f"{PREFIJO}/{f}").upload_from_filename(os.path.join(carpeta, f))
         if n % 100 == 0 or n == len(archivos):
-            print(f"{n}/{len(archivos)} archivos subidos")
+            print(f"{n}/{len(archivos)} archivos subidos", flush=True)
     if "indice.csv" not in en_bucket:  # después lo actualiza `estado`
         b.blob(f"{PREFIJO}/indice.csv").upload_from_filename(os.path.join(carpeta, "indice.csv"))
+
+
+def bajar(indice, carpeta=CARPETA):
+    """Baja del bucket los archivos de los pares que falten en la carpeta local (por ejemplo, en Colab)."""
+    b = bucket()
+    en_bucket, locales = _en_bucket(b), _locales(carpeta)
+    faltan = [f for i in indice["id"] for f in archivos_del_par(i) if f in en_bucket and f not in locales]
+    os.makedirs(os.path.join(carpeta, CONTEXTO), exist_ok=True)
+    for n, f in enumerate(faltan, 1):
+        b.blob(f"{PREFIJO}/{f}").download_to_filename(os.path.join(carpeta, f))
+        if n % 100 == 0 or n == len(faltan):
+            print(f"{n}/{len(faltan)} archivos bajados", flush=True)
 
 
 # ---------------------------------------------------------------- estado
@@ -241,7 +286,7 @@ def estado(indice, carpeta=CARPETA):
 
 def _main(argv=None):
     p = argparse.ArgumentParser(prog="python -m vmseg.generar_pares")
-    p.add_argument("paso", choices=["recortar", "proponer", "empaquetar", "subir", "estado"])
+    p.add_argument("paso", choices=["recortar", "proponer", "empaquetar", "subir", "bajar", "estado"])
     p.add_argument("ids", nargs="*", help="solo estos pares")
     args = p.parse_args(argv)
 
@@ -266,6 +311,8 @@ def _main(argv=None):
         empaquetar(elegidos)
     elif args.paso == "subir":
         subir(elegidos, regenerados=set(args.ids))
+    elif args.paso == "bajar":
+        bajar(elegidos)
     else:
         estado(indice)
 

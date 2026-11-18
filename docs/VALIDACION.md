@@ -96,12 +96,14 @@ Todo se guarda en `data/pares/`; usa las credenciales de Earth Engine para leer 
 ```
 python -m vmseg.armar_pares                   # data/indice_pares.csv (aplica las correcciones)
 python -m vmseg.generar_pares recortar        # T1, T2 y máscara sin etiquetar, desde las imágenes mensuales
-python -m vmseg.generar_pares proponer        # SAM sobre T2 y caída de NDVI (CPU: ~2 min por positivo)
+python -m vmseg.generar_pares subir           # pares cortados a gs://vmseg-imagenes/pares/
+# SAM: notebooks/proponer_pares_colab.ipynb en Colab con GPU (baja, propone y sube; minutos)
+python -m vmseg.generar_pares bajar           # trae las propuestas y la caída de NDVI
 python -m vmseg.generar_pares empaquetar      # un zip por responsable
-python -m vmseg.generar_pares subir           # todo a gs://vmseg-imagenes/pares/
+python -m vmseg.generar_pares subir           # sube los zips (no pisa máscaras ni propuestas ya subidas)
 python -m vmseg.generar_pares estado          # baja las máscaras y cuenta las validadas
 ```
 
-Para regenerar pares corregidos: `recortar <id>` y `proponer <id>`, y después `subir <id>`.
+Para regenerar pares corregidos: `recortar <id>`, `proponer <id>` (en la compu tarda ~2 min por par sin GPU) y `subir <id>`.
 
 SAM necesita `segment-anything` y el checkpoint `sam_vit_h_4b8939.pth` en `~/.cache/sam/` (https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth).

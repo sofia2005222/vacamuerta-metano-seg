@@ -96,8 +96,9 @@ def test_empaquetar_un_zip_por_responsable(tmp_path):
         assert not any("anelo" in n for n in nombres)
 
 
-def test_subir_no_pisa_mascaras_ni_propuestas_que_ya_estan_en_el_bucket():
+def test_subir_no_pisa_lo_que_ya_esta_en_el_bucket_y_sube_solo_lo_local():
+    locales = {"a_t1.tif", "a_t2.tif", "a_mask.tif", "a_propuesta.gpkg", "contexto/a_t2_contexto.tif"}
     en_bucket = {"a_mask.tif", "a_propuesta.gpkg", "a_t1.tif"}
-    assert archivos_a_subir(["a"], en_bucket) == ["a_t1.tif", "a_t2.tif", "a_dndvi.tif"]
-    # Un par regenerado (pedido por id) sí se reemplaza entero.
-    assert len(archivos_a_subir(["a"], en_bucket, regenerados={"a"})) == 5
+    assert archivos_a_subir(["a"], en_bucket, locales) == ["a_t2.tif", "contexto/a_t2_contexto.tif"]
+    # Un par regenerado (pedido por id) sí se reemplaza entero, con lo que haya localmente.
+    assert len(archivos_a_subir(["a"], en_bucket, locales, regenerados={"a"})) == 5
