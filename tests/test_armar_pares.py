@@ -42,6 +42,18 @@ def test_pares_positivos_un_par_por_locacion():
     assert list(p["x_min"]) == [2000, 0]
 
 
+def test_pares_positivos_junta_locaciones_con_el_mismo_par():
+    # Dos locaciones en el mismo encuadre con el mismo mes de perforación dan la misma imagen:
+    # queda un solo par, con la otra locación en la nota.
+    locs = pd.DataFrame([
+        dict(locacion_id=810, x=500, y=1280, fecha_primer_pozo="2021-05-02"),
+        dict(locacion_id=704, x=900, y=1280, fecha_primer_pozo="2021-05-30"),
+    ])
+    p = pares_positivos(locs, ENCUADRES)
+    assert list(p["id"]) == ["anelo_b05_e0_810"]
+    assert "704" in p["nota"].iloc[0]
+
+
 # --- Negativos ---
 
 from vmseg.armar_pares import cantidades_por_split, meses_t1_posibles, pares_negativos  # noqa: E402

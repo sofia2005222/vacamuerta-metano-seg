@@ -13,7 +13,7 @@ Dos niveles de test, ambos se reportan:
 - Los encuadres se arman adentro de cada bloque (grilla de 4×4, ver [METODO.md](METODO.md)), así que ningún recorte cruza el borde entre bloques de distinto split.
 - La Zona externa también se divide en bloques, pero solo para repartir el etiquetado: todos son `test_externo`.
 - El bloque 0 no tiene ninguna locación del padrón (por eso el script no le asignó split): sus pares van a `train` como negativos.
-- Cada locación nueva da un par positivo en el split de su bloque, así que la columna "Nuevas" es el número de positivos por split ([METODO.md](METODO.md)).
+- Cada locación nueva da un par positivo en el split de su bloque, así que la columna "Nuevas" es casi el número de positivos por split: cuando dos locaciones dan el mismo par queda uno solo, y eso pasa una vez en train, una en test_anelo y dos en test_externo (70, 18, 31 y 49 pares, ver [METODO.md](METODO.md)).
 - Por qué dos tests: Añelo es casi todo YPF (329 de 392 locaciones). Si solo se testea ahí, el modelo podría estar aprendiendo "la forma de construir de YPF". La zona externa es de Tecpetrol, Total y Pluspetrol.
 
 Conteo de locaciones por split:

@@ -78,18 +78,29 @@ def pares_positivos(locaciones, encuadres):
     """
     Un par por locación nueva. `locaciones` tiene locacion_id, x, y (en metros del CRS)
     y fecha_primer_pozo. Las que no caen en ningún encuadre no dan par.
+
+    Si dos locaciones caen en el mismo encuadre con los mismos T1 y T2, los dos pares
+    serían la misma imagen con la misma máscara (se marca toda locación nueva): queda
+    el de la primera y la otra se anota en la nota.
     """
     filas = []
+    por_par = {}  # (encuadre, mes_t1, mes_t2) -> fila
     for loc in locaciones.itertuples():
         e = encuadre_de(loc.x, loc.y, encuadres)
         if e is None:
             continue
         mes_t1, mes_t2, nota = meses_par(loc.fecha_primer_pozo)
-        filas.append(dict(
+        clave = (e.encuadre, mes_t1, mes_t2)
+        if clave in por_par:
+            fila = por_par[clave]
+            fila["nota"] = "; ".join(filter(None, [fila["nota"], f"también la locación {loc.locacion_id}"]))
+            continue
+        por_par[clave] = dict(
             id=f"{e.encuadre}_{loc.locacion_id}", encuadre=e.encuadre, locacion_id=loc.locacion_id,
             zona=e.zona, bloque=e.bloque, split=e.split, mes_t1=mes_t1, mes_t2=mes_t2,
             x_min=e.x_min, y_max=e.y_max, crs=CRS, validada=False, nota=nota,
-        ))
+        )
+        filas.append(por_par[clave])
     return pd.DataFrame(filas, columns=COLUMNAS_INDICE_PARES)
 
 
