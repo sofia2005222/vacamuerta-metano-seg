@@ -16,7 +16,9 @@
 | `locaciones_vaca_muerta.csv` / `.geojson` | Una fila por locación. **Archivo principal** |
 | `pozos_vaca_muerta.csv` / `.geojson` | Una fila por pozo (se une a locaciones por `locacion_id`) |
 | `zonas_estudio.json` | Recuadros de las zonas, grilla y split de cada bloque |
+| `pozos_todos.csv` | Todos los pozos del padrón (cualquier formación y fecha) en las dos zonas, con ~1 km de margen: **2.482 pozos**. Para elegir negativos y clasificar detecciones sin registro |
 | `armar_dataset.py` | Regenera todo (zonas y semilla configurables al principio) |
+| `armar_pozos_todos.py` | Regenera `pozos_todos.csv`; solo necesita `capitulo-iv-pozos.csv` (va aparte para no regenerar las locaciones con otra descarga) |
 
 Los `.geojson` se abren directo en QGIS o Google Earth Engine.
 
@@ -48,5 +50,6 @@ Los `.geojson` se abren directo en QGIS o Google Earth Engine.
 - La agrupación por distancia es aproximada: una locación con varias filas de pozos puede quedar partida en dos. Cuando eso se ve al validar máscaras, se anota en `data/correcciones_locaciones.csv` ("la locación X y la Y son la misma") y `armar_dataset.py` aplica las correcciones al regenerar.
 - 35 pozos sin fecha de primera producción y algunos sin fecha de perforación.
 - **Los puntos no son las etiquetas del modelo:** las máscaras se dibujan sobre la imagen.
-- **Solo Vaca Muerta no convencional:** las locaciones de pozos convencionales o de otras formaciones no están en estos archivos, pero se ven igual desde el satélite y van en las máscaras. **Pendiente:** `armar_dataset.py` tiene que exportar también una capa con todas las bocas de pozo del padrón (todas las formaciones y fechas) para clasificar las detecciones sin registro.
+- **Solo Vaca Muerta no convencional:** las locaciones de pozos convencionales o de otras formaciones no están en estos archivos, pero se ven igual desde el satélite y van en las máscaras. Para eso está `pozos_todos.csv`, con todas las bocas de pozo del padrón en las zonas (descargado el 18 de noviembre de 2026).
+- **`pozos_todos.csv`:** un mismo pozo puede aparecer en varias filas, una por formación (misma `sigla` y coordenadas, distinto `idpozo`). La columna `vaca_muerta` usa el mismo criterio que `armar_dataset.py`. **157 pozos de la Zona externa no tienen fecha de inicio de perforación** (todos de la formación Mulichinco, casi todos activos): como no se puede saber si se perforaron durante 2019–2023, los encuadres que tienen alguno (con 150 m de margen, 54 de 192) no se usan para pares negativos.
 

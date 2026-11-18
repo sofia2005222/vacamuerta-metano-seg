@@ -9,6 +9,8 @@ data/*
 !data/.gitkeep
 # Insumos livianos que sí se versionan
 !data/armar_dataset.py
+!data/armar_pozos_todos.py
+!data/pozos_todos.csv
 !data/zonas_estudio.json
 !data/pozos_vaca_muerta.csv
 !data/pozos_vaca_muerta.geojson
