@@ -49,12 +49,16 @@ def credenciales():
     """
     Credenciales de Earth Engine (incluyen Cloud Storage). Si no hay (por ejemplo en Colab,
     después de `google.colab.auth.authenticate_user()`), las de la cuenta por defecto.
+
+    Se sacan el proyecto de cuota de Earth Engine (ee-sbottino): no tiene facturación y Cloud
+    Storage rechaza las escrituras con "billing account ... disabled". Sin proyecto de cuota,
+    las paga el dueño del bucket.
     """
     try:
         import ee
         cred = ee.data.get_persistent_credentials()
         if cred is not None:
-            return cred
+            return cred.with_quota_project(None)
     except Exception:
         pass
     import google.auth
