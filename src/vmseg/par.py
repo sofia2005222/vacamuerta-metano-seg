@@ -152,8 +152,8 @@ def generar_pares_falsos(carpeta, n=8, tamano=TAMANO, semilla=42, frac_negativos
 
         split = SPLITS[i % len(SPLITS)]
         zona = "externa" if split == "test_externo" else "anelo"
-        bloque = -1 if zona == "externa" else int(rng.integers(0, 16))
-        encuadre = f"{zona}_b{bloque:02d}_e{i % 9}"
+        bloque = int(rng.integers(0, 12 if zona == "externa" else 16))
+        encuadre = f"{zona}_b{bloque:02d}_e{i % 16}"
         locacion_id = -1 if (negativo or not (mask == LOCACION).any()) else 1000 + i
         id_par = f"falso_{i:04d}"
         x_min, y_max = 330000 + i * tamano * RESOLUCION, 5770000

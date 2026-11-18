@@ -10,7 +10,7 @@ Dos niveles de test, ambos se reportan:
 | `test_externo` | Zona externa (Fortín de Piedra, Aguada Pichana Este, La Calera) | Generalización a otra zona y otras empresas. **Nunca se usa para entrenar ni para elegir hiperparámetros** |
 
 - La zona de Añelo se divide en una grilla de 4×4 bloques (~7,5 km de lado) y **cada bloque entero** va a un split. Así, recortes vecinos (casi iguales) no quedan repartidos entre train y test, lo que inflaría las métricas.
-- Los encuadres se arman adentro de cada bloque (grilla de 3×3, ver [METODO.md](METODO.md)), así que ningún recorte cruza el borde entre bloques de distinto split.
+- Los encuadres se arman adentro de cada bloque (grilla de 4×4, ver [METODO.md](METODO.md)), así que ningún recorte cruza el borde entre bloques de distinto split.
 - La Zona externa también se divide en bloques, pero solo para repartir el etiquetado: todos son `test_externo`.
 - El bloque 0 no tiene ninguna locación del padrón (por eso el script no le asignó split): sus pares van a `train` como negativos.
 - Cada locación nueva da un par positivo en el split de su bloque, así que la columna "Nuevas" es el número de positivos por split ([METODO.md](METODO.md)).
