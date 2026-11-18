@@ -10,6 +10,9 @@ meses (como los positivos, y así caen siempre en estaciones distintas). Se usan
 todos los pozos del padrón (data/pozos_todos.csv), no solo los de Vaca Muerta.
 Un negativo por encuadre como máximo, cantidad por split proporcional a los
 positivos, sin meses dudosos del índice y elegidos al azar con semilla fija.
+
+Uso (escribe data/indice_pares.csv):
+    python -m vmseg.armar_pares
 """
 import os
 
@@ -18,6 +21,7 @@ import numpy as np
 import pandas as pd
 
 from vmseg import gee
+from vmseg.encuadres import encuadres
 from vmseg.exportar import FIN, INICIO
 from vmseg.indice import RUTA_INDICE
 from vmseg.par import COLUMNAS_INDICE_PARES
@@ -30,6 +34,8 @@ LADO = TAMANO * RESOLUCION  # metros
 RUTA_LOCACIONES = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "locaciones_vaca_muerta.geojson")
 COLUMNA_ZONA = {"anelo": "en_zona_anelo", "externa": "en_zona_test_externo"}
 RUTA_POZOS_TODOS = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "pozos_todos.csv")
+RUTA_INDICE_PARES = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "indice_pares.csv")
+ZONAS = ["anelo", "externa"]
 
 SEPARACION_NEGATIVOS = 7  # meses entre T1 y T2, igual que en los positivos
 APARECE_ANTES = 6  # meses antes del inicio de perforación en que ya se puede ver la locación
@@ -184,3 +190,37 @@ def pares_negativos(encuadres, pozos, invalidos, cantidades, semilla=SEMILLA):
         if elegidos < cantidades[split]:
             raise ValueError(f"{split}: hay {elegidos} encuadres posibles y se piden {cantidades[split]}")
     return pd.DataFrame(filas, columns=COLUMNAS_INDICE_PARES)
+
+
+def anotar_meses_dudosos(pares, invalidos):
+    """Agrega a la nota de cada par si T1 o T2 es un mes dudoso de su zona (`invalidos[zona]`)."""
+    pares = pares.reset_index(drop=True)  # con índices repetidos, .at escribiría en varias filas
+    for i, par in pares.iterrows():
+        dudosos = [f"{t} {par[col]}" for t, col in [("T1", "mes_t1"), ("T2", "mes_t2")] if par[col] in invalidos[par["zona"]]]
+        if dudosos:
+            aviso = f"{' y '.join(dudosos)}: pocas observaciones despejadas, mirar con atención"
+            pares.at[i, "nota"] = "; ".join(filter(None, [par["nota"], aviso]))
+    return pares
+
+
+def armar_indice(semilla=SEMILLA):
+    """Positivos y negativos de las dos zonas, ordenados por zona, bloque y encuadre."""
+    encuadres_z = {z: encuadres(z) for z in ZONAS}
+    invalidos = {z: meses_invalidos(z) for z in ZONAS}
+    positivos = pd.concat([pares_positivos(locaciones_nuevas(z), encuadres_z[z]) for z in ZONAS])
+    cantidades = cantidades_por_split(positivos)
+    negativos = [
+        pares_negativos(encuadres_z[z], pozos_todos(z), invalidos[z],
+                        {s: n for s, n in cantidades.items() if s in set(encuadres_z[z]["split"])}, semilla)
+        for z in ZONAS
+    ]
+    indice = anotar_meses_dudosos(pd.concat([positivos, *negativos], ignore_index=True), invalidos)
+    return indice.sort_values(["zona", "bloque", "encuadre", "mes_t1"], ignore_index=True)
+
+
+if __name__ == "__main__":
+    indice = armar_indice()
+    indice.to_csv(RUTA_INDICE_PARES, index=False)
+    tipo = indice["locacion_id"].ge(0).map({True: "positivos", False: "negativos"})
+    print(f"{len(indice)} pares en {RUTA_INDICE_PARES}")
+    print(pd.crosstab(indice["split"], tipo, margins=True))

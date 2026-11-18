@@ -17,6 +17,7 @@ data/*
 !data/locaciones_vaca_muerta.csv
 !data/locaciones_vaca_muerta.geojson
 !data/indice_imagenes.csv
+!data/indice_pares.csv
 runs/
 *.pt
 *.pth

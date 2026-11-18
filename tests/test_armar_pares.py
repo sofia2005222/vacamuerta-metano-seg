@@ -120,3 +120,32 @@ def test_pares_negativos_uno_por_encuadre_y_reproducible():
     assert (p["locacion_id"] == -1).all() and (p["id"] == p["encuadre"] + "_neg").all()
     assert (p["mes_t2"].map(pd.Period) - p["mes_t1"].map(pd.Period)).map(lambda d: d.n).eq(7).all()
     assert p.equals(pares_negativos(encuadres, con_pozo_sin_fecha, set(), {"train": 3}, semilla=1))
+
+
+# --- Índice ---
+
+from vmseg.armar_pares import anotar_meses_dudosos, armar_indice  # noqa: E402
+
+
+def test_anotar_meses_dudosos_agrega_a_la_nota_que_ya_habia():
+    pares = pd.DataFrame(dict(zona=["anelo", "anelo", "externa"], mes_t1=["2020-01", "2020-07", "2020-07"],
+                              mes_t2=["2020-07", "2021-02", "2021-02"], nota=["algo", "", ""]))
+    notas = anotar_meses_dudosos(pares, {"anelo": {"2020-07"}, "externa": set()})["nota"]
+    assert notas[0].startswith("algo; ") and "T2 2020-07" in notas[0]
+    assert "T1 2020-07" in notas[1]
+    assert notas[2] == ""
+
+
+def test_indice_real():
+    idx = armar_indice()
+    assert len(idx) == 298 and idx["id"].is_unique
+    assert (idx["locacion_id"] >= 0).sum() == 168 and (idx["locacion_id"] == -1).sum() == 130
+    assert idx.groupby("encuadre")["locacion_id"].apply(lambda s: (s == -1).sum()).max() == 1
+
+
+def test_anotar_meses_dudosos_con_indice_repetido_no_mezcla_notas():
+    # Al juntar tablas con pd.concat los índices se repiten: la nota no tiene que pasar a otra fila.
+    a = pd.DataFrame(dict(zona=["anelo"], mes_t1=["2020-07"], mes_t2=["2021-02"], nota=[""]))
+    b = pd.DataFrame(dict(zona=["anelo"], mes_t1=["2020-01"], mes_t2=["2020-06"], nota=[""]))
+    notas = anotar_meses_dudosos(pd.concat([a, b]), {"anelo": {"2020-07"}})["nota"].tolist()
+    assert notas[0] != "" and notas[1] == ""
