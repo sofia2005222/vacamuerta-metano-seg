@@ -1,11 +1,11 @@
 """
 Abre un par en QGIS listo para validar su máscara propuesta (issue #9, ADR-0011).
 
-Cómo se usa (una vez por par):
+Cómo se usa:
   1. En QGIS: Plugins → Python Console → ícono "Show Editor" → abrir este archivo → ▶ Run Script.
-  2. Elegí cualquier archivo del par (por ejemplo <id>_t2.tif). En la misma carpeta tienen que estar
-     <id>_t1.tif, <id>_t2.tif, <id>_dndvi.tif y <id>_propuesta.gpkg (los arma el notebook
-     notebooks/generar_mascaras_propuestas.ipynb).
+  2. Elegí `revision.csv` de tu carpeta de pares: abre el primer par que marcaste con C en la
+     revisión rápida (python -m vmseg.revisar). Para el próximo, escribí `siguiente()` en la consola.
+     También podés elegir cualquier archivo de un par (por ejemplo <id>_t2.tif) para abrir ese.
   3. Se arma y se guarda el proyecto <id>.qgz con estas capas (de arriba hacia abajo):
        - pozos de otras formaciones: triángulos naranjas con el mes y la formación (no están en el
          padrón de locaciones, pero sus locaciones se ven igual y van en la máscara),
@@ -18,11 +18,12 @@ Cómo se usa (una vez por par):
   4. Corregí la capa "máscara (editar)": lápiz (Toggle Editing) → Vertex Tool para mover bordes,
      Add Polygon Feature para dibujar (clase 1 = locación nueva, 2 = pileta nueva),
      Delete Selected para borrar **lo que ya estaba en T1**. Guardá con "Save Layer Edits".
-  5. Convertí a máscara final (terminal, en la carpeta del repo):
-       python -m vmseg.mascaras_propuestas validar <carpeta> <id>
+  5. Cuando termines, volvé a correr la revisión rápida: los pares corregidos aparecen al final
+     y se aceptan con A (eso escribe la máscara final).
 
 Si QGIS no encuentra el padrón, cambiá RUTA_PADRON.
 """
+import csv
 import os
 
 from qgis.core import (
@@ -68,17 +69,23 @@ def apagar(proyecto, capa):
         nodo.setItemVisibilityChecked(False)
 
 
-ruta_elegida, _ = QFileDialog.getOpenFileName(None, "Elegí un archivo del par (<id>_t2.tif)", "",
-                                              "Archivos del par (*.tif *.gpkg)")
-if ruta_elegida:
-    carpeta = os.path.dirname(ruta_elegida)
-    nombre = os.path.basename(ruta_elegida)
-    id_par = next((nombre[:-len(s)] for s in SUFIJOS if nombre.endswith(s)), os.path.splitext(nombre)[0])
+def a_corregir(carpeta):
+    """Pares marcados con C en la revisión rápida (revision.csv) que todavía no se validaron."""
+    ruta = os.path.join(carpeta, "revision.csv")
+    if not os.path.exists(ruta):
+        return []
+    with open(ruta, encoding="utf-8") as f:
+        corregir = {r["id"] for r in csv.DictReader(f) if r["decision"] == "corregir"}
+    with open(os.path.join(carpeta, "indice.csv"), encoding="utf-8") as f:
+        return [r["id"] for r in csv.DictReader(f)
+                if r["id"] in corregir and r["validada"].strip().lower() != "true"]
+
+
+def abrir(carpeta, id_par):
+    """Arma y guarda el proyecto <id>.qgz con las capas del par."""
     base = os.path.join(carpeta, id_par)
-    if not RUTA_PADRON:
-        RUTA_PADRON = os.path.join(carpeta, "..", "data", "locaciones_vaca_muerta.geojson")
-    if not RUTA_POZOS_TODOS:
-        RUTA_POZOS_TODOS = os.path.join(carpeta, "..", "data", "pozos_todos.csv")
+    ruta_padron = RUTA_PADRON or os.path.join(carpeta, "..", "data", "locaciones_vaca_muerta.geojson")
+    ruta_pozos = RUTA_POZOS_TODOS or os.path.join(carpeta, "..", "data", "pozos_todos.csv")
 
     proyecto = QgsProject.instance()
     proyecto.clear()
@@ -130,8 +137,8 @@ if ruta_elegida:
         QMessageBox.warning(None, "Falta la propuesta",
                             f"No encontré {os.path.basename(ruta_gpkg)} al lado del par.")
 
-    if os.path.exists(RUTA_PADRON):
-        padron = QgsVectorLayer(RUTA_PADRON, "padrón (mes del 1er pozo)", "ogr")
+    if os.path.exists(ruta_padron):
+        padron = QgsVectorLayer(ruta_padron, "padrón (mes del 1er pozo)", "ogr")
         padron.renderer().setSymbol(QgsMarkerSymbol.createSimple(
             {"name": "circle", "color": "255,255,255", "outline_color": "0,0,0", "size": "1.6"}))
         texto = QgsPalLayerSettings()
@@ -141,8 +148,8 @@ if ruta_elegida:
         padron.setLabelsEnabled(True)
         proyecto.addMapLayer(padron)
 
-    if os.path.exists(RUTA_POZOS_TODOS):
-        uri = ("file:///" + os.path.abspath(RUTA_POZOS_TODOS).replace("\\", "/")
+    if os.path.exists(ruta_pozos):
+        uri = ("file:///" + os.path.abspath(ruta_pozos).replace("\\", "/")
                + "?delimiter=,&xField=lon&yField=lat&crs=EPSG:4326")
         otros = QgsVectorLayer(uri, "pozos de otras formaciones (mes, formación)", "delimitedtext")
         otros.setSubsetString("lower(to_string(\"vaca_muerta\")) = 'false'")
@@ -167,3 +174,34 @@ if ruta_elegida:
         iface.setActiveLayer(mascara)
     proyecto.write(f"{base}.qgz")
     print("Proyecto guardado:", f"{base}.qgz")
+
+
+COLA = {"carpeta": None, "ids": [], "pos": -1}
+
+
+def siguiente():
+    """Abre el próximo par para corregir (escribilo en la consola)."""
+    COLA["pos"] += 1
+    if COLA["pos"] >= len(COLA["ids"]):
+        print("No quedan pares para corregir. Volvé a correr la revisión rápida y aceptalos con A.")
+        return
+    id_par = COLA["ids"][COLA["pos"]]
+    print(f"[{COLA['pos'] + 1}/{len(COLA['ids'])}] {id_par}")
+    abrir(COLA["carpeta"], id_par)
+
+
+ruta_elegida, _ = QFileDialog.getOpenFileName(
+    None, "Elegí revision.csv (pares para corregir) o un archivo de un par", "",
+    "Pares (revision.csv *.tif *.gpkg)")
+if ruta_elegida:
+    carpeta = os.path.dirname(ruta_elegida)
+    nombre = os.path.basename(ruta_elegida)
+    COLA.update(carpeta=carpeta, ids=a_corregir(carpeta), pos=-1)
+    if nombre == "revision.csv":
+        print(f"{len(COLA['ids'])} pares para corregir. Para pasar al próximo: siguiente()")
+        siguiente()
+    else:
+        id_par = next((nombre[:-len(s)] for s in SUFIJOS if nombre.endswith(s)), os.path.splitext(nombre)[0])
+        if id_par in COLA["ids"]:
+            COLA["pos"] = COLA["ids"].index(id_par)
+        abrir(carpeta, id_par)

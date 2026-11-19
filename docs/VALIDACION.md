@@ -1,6 +1,6 @@
 # Cómo validar los pares
 
-Guía para validar las máscaras de los pares asignados (issues #12, #13 y #14). Cada una valida los pares de sus bloques: la columna `responsable` de `data/indice_pares.csv` dice de quién es cada uno (unos 100 cada una). Con el circuito del #9 se tarda unos 2 minutos por par (#10).
+Guía para validar las máscaras de los pares asignados (issues #12, #13 y #14). Cada una valida los pares de sus bloques: la columna `responsable` de `data/indice_pares.csv` dice de quién es cada uno (unos 100 cada una). Primero una **revisión rápida** de todos (unos segundos por par) y después QGIS solo para los que hay que corregir (unos 2 minutos cada uno, #10).
 
 ## 0. Una sola vez
 
@@ -28,16 +28,41 @@ Por cada par hay cinco archivos:
 
 Y un `indice.csv` con tus pares. Mirá la columna `nota` antes de abrir cada uno.
 
-## 2. Validar cada par en QGIS
+## 2. Revisión rápida
+
+En una terminal, en la carpeta del repo:
+
+```
+python -m vmseg.revisar pares_<persona>
+```
+
+Se abre una ventana con T1, T2 y la caída de NDVI de cada par, con los polígonos de SAM (rojo = locación, celeste = pileta), el padrón (puntos blancos con el mes del primer pozo) y los pozos de otras formaciones (triángulos naranjas). Arriba están las notas del par. Con la lupa de la barra de abajo se hace zoom (los tres paneles se mueven juntos; la casita vuelve al par entero).
+
+Mirá el par y apretá una tecla:
+
+| Tecla | Cuándo | Qué hace |
+|---|---|---|
+| **A** | La propuesta está bien (o el negativo no tiene nada nuevo) | Escribe `<id>_mask.tif` y marca el par validado |
+| **C** | Hay que corregir algo: borrar, agregar o mover bordes | Lo deja para QGIS |
+| **T** | La locación del padrón que originó el par **ya se ve en T1** | Agrega `t1_menos_12` a `data/correcciones_pares.csv` |
+| **P** | Esa locación ya estaba en enero de 2019 | Agrega `preexistente` a `data/correcciones_pares.csv` |
+| **←** / **→** | Volver al anterior / saltear | Si volvés y apretás otra tecla, se deshace la decisión anterior |
+| **Q** | Salir | Lo decidido queda guardado en `pares_<persona>/revision.csv`; al volver a abrir sigue donde quedaste |
+
+Aceptá con A solo si **no hay nada que tocar**. Ante la duda, C.
+
+## 3. Corregir en QGIS los marcados con C
 
 1. En QGIS: Plugins → Python Console → Show Editor → abrir `scripts/qgis_abrir_par.py` → Run Script.
-2. Elegí cualquier archivo del par (por ejemplo `<id>_t2.tif`). Se arma el proyecto con estas capas:
+2. Elegí `pares_<persona>/revision.csv`: abre el primer par marcado con C. Para el siguiente, escribí `siguiente()` en la consola y Enter. (También podés elegir un archivo de un par para abrir ese.)
+3. Capas del proyecto:
    - **pozos de otras formaciones** (triángulos naranjas): mes del pozo y formación;
    - **padrón** (puntos blancos): locaciones de Vaca Muerta, con el mes del primer pozo;
    - **máscara (editar)**: rojo = locación nueva, azul = pileta nueva;
    - **caída de NDVI** (apagada), **T2** y **T1** (apagada).
-3. Prendé y apagá T1, T2 y la caída de NDVI para ver qué apareció entre las dos fechas.
-4. Corregí la capa "máscara (editar)": lápiz (Toggle Editing) → Vertex Tool para mover bordes, Add Polygon Feature para dibujar (clase 1 = locación nueva, 2 = pileta nueva), Delete Selected para borrar. Guardá con Save Layer Edits.
+4. Prendé y apagá T1, T2 y la caída de NDVI para ver qué apareció entre las dos fechas.
+5. Corregí la capa "máscara (editar)": lápiz (Toggle Editing) → Vertex Tool para mover bordes, Add Polygon Feature para dibujar (clase 1 = locación nueva, 2 = pileta nueva), Delete Selected para borrar. Guardá con Save Layer Edits.
+6. Cuando termines con todos, volvé a correr `python -m vmseg.revisar pares_<persona>`: los corregidos aparecen al final, ya con tus cambios. Aceptalos con **A** (eso escribe la máscara final).
 
 **Qué se marca** (ver `GLOSSARY.md`, `docs/METODO.md` y ADR-0011):
 
@@ -58,26 +83,16 @@ Y un `indice.csv` con tus pares. Mirá la columna `nota` antes de abrir cada uno
 | Un par sin polígonos (los que terminan en `_neg` son negativos) | Confirmá con la caída de NDVI que no apareció nada; si apareció algo, marcalo |
 | Nota del índice "pocas observaciones despejadas" | Ese mes puede tener restos de nubes, sombras o nieve: no los marques |
 | Nota del índice "también la locación X" | El par tiene dos locaciones del padrón: que estén las dos |
-| La locación del padrón que originó el par **ya se ve en T1** | No lo valides: agregá una fila a `data/correcciones_pares.csv` (ver abajo) |
+| La locación del padrón que originó el par **ya se ve en T1** | En la revisión rápida, **T** (no lo corrijas en QGIS) |
 | Dos puntos del padrón que son una sola locación (por ejemplo, la 720 y la 721) | Marcala igual y escribilo en `nota`, para el #15 |
-
-## 3. Pasar a máscara final
-
-En una terminal, en la carpeta del repo:
-
-```
-python -m vmseg.mascaras_propuestas validar pares_<persona> <id>
-```
-
-Sin `<id>`, hace todos los pares de la carpeta. Escribe `<id>_mask.tif` y marca `validada=True` en tu `indice.csv`.
 
 ## 4. Devolverlos
 
-Subí, de cada par validado, `<id>_mask.tif` y `<id>_propuesta.gpkg` a la carpeta `pares/` del bucket (https://console.cloud.google.com/storage/browser/vmseg-imagenes/pares, botón Upload files; reemplaza los anteriores). Conviene hacerlo de a tandas, al final de cada sesión. Sofi corre `python -m vmseg.generar_pares estado` para actualizar `pares/indice.csv` del bucket y ver cuántos lleva cada una.
+Subí, de cada par validado, `<id>_mask.tif` y `<id>_propuesta.gpkg`, y también `revision.csv`, a la carpeta `pares/` del bucket (https://console.cloud.google.com/storage/browser/vmseg-imagenes/pares, botón Upload files; reemplaza los anteriores). Conviene hacerlo de a tandas, al final de cada sesión. Sofi corre `python -m vmseg.generar_pares estado` para actualizar `pares/indice.csv` del bucket y ver cuántos lleva cada una.
 
 ## Cuando la locación ya se ve en T1
 
-Agregá una fila a `data/correcciones_pares.csv` (por PR o pasándosela a Sofi):
+La revisión rápida agrega la fila sola con **T** o **P** en `data/correcciones_pares.csv`. Pasásela a Sofi (por PR o por mensaje). A mano es así:
 
 ```
 id,accion,nota
