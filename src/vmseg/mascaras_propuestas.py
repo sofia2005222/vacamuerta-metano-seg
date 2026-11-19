@@ -34,6 +34,7 @@ import rasterio
 from rasterio.features import rasterize, shapes
 from rasterio.transform import rowcol, xy
 from rasterio.windows import Window, from_bounds
+from scipy import ndimage
 from shapely.geometry import box, shape
 
 from vmseg.par import guardar_tif, leer_indice_pares
@@ -42,6 +43,8 @@ from vmseg.recorte import CRS, FONDO, LOCACION, PILETA, RESOLUCION
 MESES_DESPUES = 6        # locaciones perforadas poco después de T2 pueden estar ya en obra
 CONTEXTO = 512           # lado, en píxeles, de la imagen que ve SAM si hay imagen mensual
 CAMPOS = ["clase", "origen", "locacion_id", "verificar", "nota"]
+MAX_HA = 10              # una locación con piletas no llega; más grande es que SAM agarró el fondo (#11)
+MAX_PIXELES = int(MAX_HA * 10_000 / RESOLUCION**2)
 
 
 # ---------------------------------------------------------------- imagen
@@ -111,10 +114,11 @@ def locaciones_nuevas_para_clic(locaciones, transform, crs, alto, ancho, mes_t1,
     meses después del fin de `mes_t2`.
 
     locaciones: GeoDataFrame del padrón (`data/locaciones_vaca_muerta.geojson`), en cualquier CRS.
-    Devuelve un DataFrame con locacion_id, fila, col, fecha_primer_pozo y verificar
-    (1 si el primer pozo es posterior a T2: la locación puede no estar todavía).
+    Si tiene una columna `nota` (por ejemplo, pozos de otras formaciones), pasa a los polígonos.
+    Devuelve un DataFrame con locacion_id, fila, col, fecha_primer_pozo, verificar
+    (1 si el primer pozo es posterior a T2: la locación puede no estar todavía) y nota.
     """
-    columnas = ["locacion_id", "fila", "col", "fecha_primer_pozo", "verificar"]
+    columnas = ["locacion_id", "fila", "col", "fecha_primer_pozo", "verificar", "nota"]
     loc = locaciones[locaciones["fecha_primer_pozo"].notna()].copy()
     loc["fecha"] = pd.to_datetime(loc["fecha_primer_pozo"])
     fin_t1, fin_t2 = _fin_de_mes(mes_t1), _fin_de_mes(mes_t2)
@@ -132,6 +136,7 @@ def locaciones_nuevas_para_clic(locaciones, transform, crs, alto, ancho, mes_t1,
         "col": loc["col"].values,
         "fecha_primer_pozo": loc["fecha"].dt.strftime("%Y-%m-%d").values,
         "verificar": (loc["fecha"] > fin_t2).astype(int).values,
+        "nota": loc["nota"].fillna("").values if "nota" in loc else "",
     }, columns=columnas)
 
 
@@ -141,7 +146,8 @@ def segmentador_sam(predictor):
     """
     Envuelve un `segment_anything.SamPredictor` en la función `segmentar(rgb, fila, col)`.
     Codifica cada imagen una sola vez y, de las 3 máscaras que propone SAM, devuelve la de mayor
-    puntaje (igual que en la prueba del #8).
+    puntaje (igual que en la prueba del #8) entre las de hasta MAX_PIXELES: en los pares del #11
+    la de mayor puntaje a veces era el fondo entero.
     """
     estado = {"imagen": None}
 
@@ -153,9 +159,27 @@ def segmentador_sam(predictor):
             point_coords=np.array([[col, fila]]), point_labels=np.array([1]),
             multimask_output=True,
         )
+        scores = np.where(masks.reshape(len(masks), -1).sum(axis=1) <= MAX_PIXELES, scores, -np.inf)
         return masks[int(np.argmax(scores))]
 
     return segmentar
+
+
+def parte_del_clic(mask, fila, col):
+    """
+    La parte conexa de `mask` que contiene el clic (o la más cercana, si el clic cae afuera);
+    vacía si es más grande que MAX_PIXELES. Saca las manchitas sueltas que a veces devuelve SAM.
+    """
+    etiquetas, n = ndimage.label(mask)
+    if n == 0:
+        return mask
+    e = etiquetas[fila, col]
+    if e == 0:
+        filas, cols = np.nonzero(etiquetas)
+        cerca = np.argmin((filas - fila) ** 2 + (cols - col) ** 2)
+        e = etiquetas[filas[cerca], cols[cerca]]
+    parte = etiquetas == e
+    return parte if parte.sum() <= MAX_PIXELES else np.zeros_like(parte)
 
 
 # ---------------------------------------------------------------- polígonos ↔ máscara
@@ -211,10 +235,12 @@ def proponer(img_t2, transform, crs, mes_t1, mes_t2, locaciones, segmentar,
                                          mes_t1, mes_t2, meses_despues)
     partes = []
     for p in puntos.itertuples():
-        m = np.asarray(segmentar(rgb, int(p.fila), int(p.col)), dtype=bool)
+        m = parte_del_clic(np.asarray(segmentar(rgb, int(p.fila), int(p.col)), dtype=bool),
+                           int(p.fila), int(p.col))
         if not m.any():
             continue
-        nota = "primer pozo posterior a T2: confirmar que se vea" if p.verificar else ""
+        nota = "; ".join(filter(None, [
+            p.nota, "primer pozo posterior a T2: confirmar que se vea" if p.verificar else ""]))
         partes.append(mascara_a_poligonos(m, transform, crs, origen="sam",
                                           locacion_id=int(p.locacion_id),
                                           verificar=int(p.verificar), nota=nota))

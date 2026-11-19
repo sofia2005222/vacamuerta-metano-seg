@@ -24,7 +24,7 @@ dependencies = [
 
 [project.optional-dependencies]
 gee = ["earthengine-api"]
-sam = ["segment-geospatial"]
+sam = ["segment-geospatial", "segment-anything"]
 dev = ["pytest"]
 
 [tool.setuptools.packages.find]

@@ -98,6 +98,54 @@ def test_proponer_recorta_al_recorte_dentro_del_contexto():
     assert (poligonos_a_mascara(prop, t, 128, 128) == LOCACION).sum() == 10 * 10
 
 
+def test_proponer_pasa_la_nota_del_padron_a_los_poligonos():
+    # Pozos de otras formaciones: entran al padrón con locacion_id = -1 y una nota para quien valida.
+    t = _transform()
+    img = np.full((6, 64, 64), 0.1, np.float32)
+    region = np.zeros((64, 64), bool)
+    region[10:20, 10:20] = True
+    padron = _padron([xy(t, 15, 15)], ["2021-05-01"])
+    padron["locacion_id"] = -1
+    padron["nota"] = "otra formación"
+    prop = proponer(img, t, CRS, "2021-01", "2021-08", padron, _sam_falso(region))
+    assert list(prop["locacion_id"]) == [-1] and list(prop["nota"]) == ["otra formación"]
+
+
+def test_proponer_se_queda_con_la_parte_que_toca_el_clic():
+    # SAM a veces devuelve la locación más manchitas sueltas por el encuadre (#11).
+    t = _transform()
+    img = np.full((6, 64, 64), 0.1, np.float32)
+    mask = np.zeros((64, 64), bool)
+    mask[10:20, 10:20] = True
+    mask[40, 40] = mask[50:52, 5:7] = True
+    padron = _padron([xy(t, 15, 15)], ["2021-05-01"])
+    prop = proponer(img, t, CRS, "2021-01", "2021-08", padron, lambda rgb, f, c: mask)
+    assert len(prop) == 1 and (poligonos_a_mascara(prop, t, 64, 64) == LOCACION).sum() == 100
+
+
+def test_proponer_descarta_mascaras_mas_grandes_que_una_locacion():
+    # Si SAM agarra el fondo (todo el encuadre), no se propone nada para ese clic.
+    t = _transform()
+    img = np.full((6, 128, 128), 0.1, np.float32)
+    padron = _padron([xy(t, 15, 15)], ["2021-05-01"])
+    prop = proponer(img, t, CRS, "2021-01", "2021-08", padron, lambda rgb, f, c: np.ones((128, 128), bool))
+    assert prop.empty
+
+
+def test_segmentador_sam_elige_la_mejor_mascara_del_tamano_de_una_locacion():
+    from vmseg.mascaras_propuestas import MAX_PIXELES, segmentador_sam
+    chica = np.zeros((128, 128), bool)
+    chica[:10, :10] = True
+    fondo = np.ones((128, 128), bool)            # más de MAX_PIXELES
+
+    class Predictor:
+        def set_image(self, rgb): pass
+        def predict(self, **_): return np.stack([chica, fondo, chica]), np.array([0.5, 0.9, 0.4]), None
+
+    assert fondo.sum() > MAX_PIXELES
+    assert segmentador_sam(Predictor())(np.zeros((128, 128, 3), np.uint8), 5, 5).sum() == 100
+
+
 def test_circuito_completo_con_pares_falsos(tmp_path):
     """proponer_par → (QGIS, acá sin cambios) → validar_par → máscara de cambio en formato de par."""
     indice = generar_pares_falsos(tmp_path, n=4, tamano=64, semilla=3, frac_negativos=0)

@@ -50,10 +50,10 @@ Una fila por par.
 | Columna | Ejemplo | Descripción |
 |---|---|---|
 | `id` | `anelo_b07_e4_738` | Nombre de los archivos, sin sufijo ni extensión |
-| `encuadre` | `anelo_b07_e4` | Encuadre del par (bloque y posición en la grilla de 3×3) |
+| `encuadre` | `anelo_b07_e4` | Encuadre del par (bloque y posición en la grilla de 4×4, `e0` a `e15`) |
 | `locacion_id` | `738` | Locación nueva del padrón que originó el par; `-1` en los negativos |
 | `zona` | `anelo` / `externa` | Zona de estudio |
-| `bloque` | `7` | Bloque de la grilla 4×4 (0–15); `-1` en la Zona externa |
+| `bloque` | `7` | Bloque de la zona: 0–15 en Añelo (grilla 4×4), 0–11 en la Zona externa (3 columnas × 4 filas) |
 | `split` | `train` | `train`, `val`, `test_anelo` o `test_externo` |
 | `mes_t1` | `2021-04` | Mes de la mediana mensual de T1 |
 | `mes_t2` | `2021-11` | Mes de la mediana mensual de T2 |
@@ -61,6 +61,7 @@ Una fila por par.
 | `crs` | `EPSG:32719` | CRS de las coordenadas |
 | `validada` | `True` | Si una persona ya validó la máscara (si no, es una máscara propuesta) |
 | `nota` | | Texto libre |
+| `responsable` | `sofi` | Quién valida el par: `sofi`, `agus` o `bian` (cada bloque entero es de una sola, ver `REPARTO` en `src/vmseg/armar_pares.py`) |
 
 ## Pares falsos
 

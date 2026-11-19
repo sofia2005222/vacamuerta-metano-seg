@@ -7,6 +7,8 @@ Cómo se usa (una vez por par):
      <id>_t1.tif, <id>_t2.tif, <id>_dndvi.tif y <id>_propuesta.gpkg (los arma el notebook
      notebooks/generar_mascaras_propuestas.ipynb).
   3. Se arma y se guarda el proyecto <id>.qgz con estas capas (de arriba hacia abajo):
+       - pozos de otras formaciones: triángulos naranjas con el mes y la formación (no están en el
+         padrón de locaciones, pero sus locaciones se ven igual y van en la máscara),
        - padrón: puntos con el mes del primer pozo,
        - máscara (editar): la propuesta (rojo = locación nueva, azul = pileta nueva;
          "¿se ve?" = locación perforada después de T2: confirmá que ya esté),
@@ -32,8 +34,10 @@ from qgis.core import (
 from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox
 from qgis.utils import iface
 
-# padrón de locaciones del repo (si los pares están en <repo>/pares_prueba/, se encuentra solo)
+# padrón de locaciones del repo (si los pares están en <repo>/pares_<persona>/, se encuentra solo)
 RUTA_PADRON = ""
+# pozos de todas las formaciones (data/pozos_todos.csv): se muestran los que no son de Vaca Muerta
+RUTA_POZOS_TODOS = ""
 SUFIJOS = ("_t1.tif", "_t2.tif", "_mask.tif", "_dndvi.tif", "_propuesta.gpkg")
 
 
@@ -73,6 +77,8 @@ if ruta_elegida:
     base = os.path.join(carpeta, id_par)
     if not RUTA_PADRON:
         RUTA_PADRON = os.path.join(carpeta, "..", "data", "locaciones_vaca_muerta.geojson")
+    if not RUTA_POZOS_TODOS:
+        RUTA_POZOS_TODOS = os.path.join(carpeta, "..", "data", "pozos_todos.csv")
 
     proyecto = QgsProject.instance()
     proyecto.clear()
@@ -134,6 +140,21 @@ if ruta_elegida:
         padron.setLabeling(QgsVectorLayerSimpleLabeling(texto))
         padron.setLabelsEnabled(True)
         proyecto.addMapLayer(padron)
+
+    if os.path.exists(RUTA_POZOS_TODOS):
+        uri = ("file:///" + os.path.abspath(RUTA_POZOS_TODOS).replace("\\", "/")
+               + "?delimiter=,&xField=lon&yField=lat&crs=EPSG:4326")
+        otros = QgsVectorLayer(uri, "pozos de otras formaciones (mes, formación)", "delimitedtext")
+        otros.setSubsetString("lower(to_string(\"vaca_muerta\")) = 'false'")
+        otros.renderer().setSymbol(QgsMarkerSymbol.createSimple(
+            {"name": "triangle", "color": "255,150,0", "outline_color": "0,0,0", "size": "2"}))
+        texto = QgsPalLayerSettings()
+        texto.fieldName = ("coalesce(left(to_string(\"fecha_inicio_perforacion\"), 7), 'sin fecha')"
+                           " || ' ' || \"formacion\"")
+        texto.isExpression = True
+        otros.setLabeling(QgsVectorLayerSimpleLabeling(texto))
+        otros.setLabelsEnabled(True)
+        proyecto.addMapLayer(otros)
 
     # el mapa en el CRS de los pares (UTM 19S) y centrado en el par: si no, QGIS toma el del
     # padrón (lon/lat) y el par queda chiquito en un mapa de toda la provincia
