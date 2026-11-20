@@ -266,7 +266,8 @@ def guardar_propuesta(propuesta, ruta):
         propuesta[col] = propuesta[col].astype(tipo)
     propuesta["origen"] = propuesta["origen"].astype(str)
     propuesta["nota"] = propuesta["nota"].fillna("").astype(str)
-    propuesta.to_file(ruta, layer="mascara", driver="GPKG")
+    # explícito: vacía (negativos) quedaría "Unknown" y QGIS no deja dibujar polígonos
+    propuesta.to_file(ruta, layer="mascara", driver="GPKG", geometry_type="Polygon")
 
 
 def _fila_indice(carpeta, id_par):

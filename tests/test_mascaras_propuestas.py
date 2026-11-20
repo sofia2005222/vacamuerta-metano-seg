@@ -62,6 +62,15 @@ def test_sin_poligonos_da_todo_fondo():
     assert not poligonos_a_mascara(None, _transform(), 8, 8).any()
 
 
+def test_propuesta_vacia_se_guarda_como_capa_de_poligonos(tmp_path):
+    """Sin tipo de geometría (Unknown), QGIS no ofrece Add Polygon Feature y no se puede dibujar."""
+    import pyogrio
+    vacia = mascara_a_poligonos(np.zeros((8, 8), bool), _transform(), CRS)
+    ruta = tmp_path / "x_neg_propuesta.gpkg"
+    guardar_propuesta(vacia, ruta)
+    assert pyogrio.read_info(ruta, layer="mascara")["geometry_type"] == "Polygon"
+
+
 # ---------------------------------------------------------------- puntos del padrón
 
 def test_clic_solo_en_locaciones_nuevas_entre_t1_y_t2():

@@ -88,7 +88,7 @@ Aceptá con A solo si **no hay nada que tocar**. Ante la duda, C.
 
 ## 4. Devolverlos
 
-Subí, de cada par validado, `<id>_mask.tif` y `<id>_propuesta.gpkg`, y también `revision.csv`, a la carpeta `pares/` del bucket (https://console.cloud.google.com/storage/browser/vmseg-imagenes/pares, botón Upload files; reemplaza los anteriores). Conviene hacerlo de a tandas, al final de cada sesión. Sofi corre `python -m vmseg.generar_pares estado` para actualizar `pares/indice.csv` del bucket y ver cuántos lleva cada una.
+Subí, de cada par validado, `<id>_mask.tif` y `<id>_propuesta.gpkg`, y también `revision.csv` **renombrado a `revision_<persona>.csv`** (si no, las tres se pisan), a la carpeta `pares/` del bucket (https://console.cloud.google.com/storage/browser/vmseg-imagenes/pares, botón Upload files; reemplaza los anteriores). Conviene hacerlo de a tandas, al final de cada sesión. Sofi corre `python -m vmseg.generar_pares estado` para actualizar `pares/indice.csv` del bucket y ver cuántos lleva cada una.
 
 ## Cuando la locación ya se ve en T1
 
