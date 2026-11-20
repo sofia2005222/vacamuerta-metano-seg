@@ -218,10 +218,12 @@ def aplicar_correcciones(indice, correcciones):
     """
     Correcciones que salen de validar (data/correcciones_pares.csv: id, accion, nota):
       t1_menos_12   la locación ya se veía en T1: T1 pasa de −6 a −12 meses (no antes de enero de 2019)
+      t1_menos_24   se desmontó más de un año antes del pozo: T1 pasa a −24 meses (no antes de enero de 2019)
       preexistente  la locación ya estaba en enero de 2019: el par sale (se anota para #15)
     El id del par no cambia; hay que volver a recortarlo y proponerlo (docs/VALIDACION.md).
     """
-    acciones = {"t1_menos_12", "preexistente"}
+    corrimiento = {"t1_menos_12": 12, "t1_menos_24": 24}  # meses antes del inicio de perforación
+    acciones = {*corrimiento, "preexistente"}
     desconocidas = set(correcciones["accion"]) - acciones
     if desconocidas:
         raise ValueError(f"acciones desconocidas en las correcciones: {desconocidas}")
@@ -231,9 +233,11 @@ def aplicar_correcciones(indice, correcciones):
         if c.accion == "preexistente":
             indice = indice[~fila]
             continue
-        t1 = max(pd.Period(indice.loc[fila, "mes_t1"].iloc[0], freq="M") - 6, pd.Period(INICIO, freq="M"))
+        meses = corrimiento[c.accion]
+        t1 = max(pd.Period(indice.loc[fila, "mes_t1"].iloc[0], freq="M") - (meses - MESES_ANTES),
+                 pd.Period(INICIO, freq="M"))
         indice.loc[fila, "mes_t1"] = str(t1)
-        aviso = "; ".join(filter(None, ["T1 corrido a −12 meses: la locación ya se veía", c.nota]))
+        aviso = "; ".join(filter(None, [f"T1 corrido a −{meses} meses: la locación ya se veía", c.nota]))
         indice.loc[fila, "nota"] = indice.loc[fila, "nota"].map(lambda n: "; ".join(filter(None, [n, aviso])))
     return indice.reset_index(drop=True)
 
