@@ -32,3 +32,5 @@ runs/
 # Pares de prueba del etiquetado (issue #9): no se suben
 pares_*/
 *.qgz
+pares_*/
+revision/
