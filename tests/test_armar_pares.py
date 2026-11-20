@@ -137,10 +137,14 @@ def test_anotar_meses_dudosos_agrega_a_la_nota_que_ya_habia():
 
 
 def test_indice_real():
-    idx = armar_indice()
+    idx = armar_indice(ruta_correcciones="")  # sin correcciones de la validación
     assert len(idx) == 298 and idx["id"].is_unique
     assert (idx["locacion_id"] >= 0).sum() == 168 and (idx["locacion_id"] == -1).sum() == 130
     assert idx.groupby("encuadre")["locacion_id"].apply(lambda s: (s == -1).sum()).max() == 1
+    # con las correcciones solo salen los preexistentes
+    from vmseg.armar_pares import RUTA_CORRECCIONES
+    preexistentes = (pd.read_csv(RUTA_CORRECCIONES)["accion"] == "preexistente").sum()
+    assert len(armar_indice()) == 298 - preexistentes
 
 
 def test_reparto_cubre_todos_los_bloques_una_vez_y_queda_parejo():
@@ -149,7 +153,7 @@ def test_reparto_cubre_todos_los_bloques_una_vez_y_queda_parejo():
     for zona, personas in REPARTO.items():
         asignados = sorted(b for bs in personas.values() for b in bs)
         assert asignados == sorted(bloques(zona))
-    idx = armar_indice()
+    idx = armar_indice(ruta_correcciones="")  # el reparto, antes de sacar los preexistentes
     assert idx["responsable"].notna().all()
     por_persona = idx["responsable"].value_counts()
     assert por_persona.max() - por_persona.min() <= 3
@@ -174,6 +178,16 @@ def test_aplicar_correcciones_corre_t1_o_saca_el_par():
     assert list(r["id"]) == ["a", "b"]
     assert list(r["mes_t1"]) == ["2020-03", "2019-01"]  # 6 meses antes, sin pasar de enero de 2019
     assert "T1 corrido" in r["nota"].iloc[0] and "se veía" in r["nota"].iloc[0]
+
+
+def test_t1_menos_24_para_locaciones_desmontadas_mas_de_un_anio_antes():
+    from vmseg.armar_pares import aplicar_correcciones
+    idx = pd.DataFrame(dict(id=["a", "b"], mes_t1=["2020-11", "2019-09"],
+                            mes_t2=["2021-06", "2020-04"], nota=["", ""]))
+    corr = pd.DataFrame(dict(id=["a", "b"], accion=["t1_menos_24", "t1_menos_24"], nota=["", ""]))
+    r = aplicar_correcciones(idx, corr)
+    assert list(r["mes_t1"]) == ["2019-05", "2019-01"]  # 18 meses antes, sin pasar de enero de 2019
+    assert "−24 meses" in r["nota"].iloc[0]
 
 
 def test_aplicar_correcciones_rechaza_accion_desconocida():
