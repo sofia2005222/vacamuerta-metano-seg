@@ -30,5 +30,5 @@ runs/
 .DS_Store
 
 # Pares de prueba del etiquetado (issue #9): no se suben
-pares_prueba/
+pares_*/
 *.qgz
