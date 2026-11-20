@@ -153,7 +153,7 @@ def test_reparto_cubre_todos_los_bloques_una_vez_y_queda_parejo():
     for zona, personas in REPARTO.items():
         asignados = sorted(b for bs in personas.values() for b in bs)
         assert asignados == sorted(bloques(zona))
-    idx = armar_indice()
+    idx = armar_indice(ruta_correcciones="")  # el reparto, antes de sacar los preexistentes
     assert idx["responsable"].notna().all()
     por_persona = idx["responsable"].value_counts()
     assert por_persona.max() - por_persona.min() <= 3

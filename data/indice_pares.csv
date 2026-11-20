@@ -79,8 +79,8 @@ anelo_b06_e1_886,anelo_b06_e1,886,anelo,6,train,2022-12,2023-07,530110,5764140,E
 anelo_b06_e10_709,anelo_b06_e10,709,anelo,6,train,2020-11,2021-06,531800,5760330,EPSG:32719,False,"T2 2021-06: pocas observaciones despejadas, mirar con atención",sofi
 anelo_b06_e10_neg,anelo_b06_e10,-1,anelo,6,train,2022-07,2023-02,531800,5760330,EPSG:32719,False,,sofi
 anelo_b06_e11_921,anelo_b06_e11,921,anelo,6,train,2023-04,2023-11,533480,5760330,EPSG:32719,False,"T1 2023-04: pocas observaciones despejadas, mirar con atención",sofi
+anelo_b06_e12_677,anelo_b06_e12,677,anelo,6,train,2019-02,2021-03,528430,5758420,EPSG:32719,False,T1 corrido a −24 meses: la locación ya se veía; con -12 todavía se ve; limpia en 2019-02,sofi
 anelo_b06_e12_662,anelo_b06_e12,662,anelo,6,train,2019-05,2019-12,528430,5758420,EPSG:32719,False,,sofi
-anelo_b06_e12_677,anelo_b06_e12,677,anelo,6,train,2020-02,2021-03,528430,5758420,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_sofi),sofi
 anelo_b06_e12_731,anelo_b06_e12,731,anelo,6,train,2021-02,2021-09,528430,5758420,EPSG:32719,False,,sofi
 anelo_b06_e12_neg,anelo_b06_e12,-1,anelo,6,train,2022-11,2023-06,528430,5758420,EPSG:32719,False,,sofi
 anelo_b06_e13_626,anelo_b06_e13,626,anelo,6,train,2019-02,2019-09,530110,5758420,EPSG:32719,False,,sofi
@@ -92,8 +92,8 @@ anelo_b06_e2_912,anelo_b06_e2,912,anelo,6,train,2022-12,2023-07,531800,5764140,E
 anelo_b06_e3_683,anelo_b06_e3,683,anelo,6,train,2020-01,2021-02,533480,5764140,EPSG:32719,False,"T1 2020-07: pocas observaciones despejadas, mirar con atención; T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_sofi)",sofi
 anelo_b06_e3_789,anelo_b06_e3,789,anelo,6,train,2021-12,2022-07,533480,5764140,EPSG:32719,False,,sofi
 anelo_b06_e4_663,anelo_b06_e4,663,anelo,6,train,2019-05,2019-12,528430,5762230,EPSG:32719,False,,sofi
+anelo_b06_e4_750,anelo_b06_e4,750,anelo,6,train,2020-08,2022-09,528430,5762230,EPSG:32719,False,T1 corrido a −24 meses: la locación ya se veía; con -12 todavía se ve; limpia en 2020-08,sofi
 anelo_b06_e4_751,anelo_b06_e4,751,anelo,6,train,2021-03,2021-10,528430,5762230,EPSG:32719,False,,sofi
-anelo_b06_e4_750,anelo_b06_e4,750,anelo,6,train,2021-08,2022-09,528430,5762230,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_sofi),sofi
 anelo_b06_e5_neg,anelo_b06_e5,-1,anelo,6,train,2020-08,2021-03,530110,5762230,EPSG:32719,False,,sofi
 anelo_b06_e6_neg,anelo_b06_e6,-1,anelo,6,train,2020-09,2021-04,531800,5762230,EPSG:32719,False,,sofi
 anelo_b06_e6_913,anelo_b06_e6,913,anelo,6,train,2022-08,2023-03,531800,5762230,EPSG:32719,False,,sofi
@@ -139,10 +139,9 @@ anelo_b10_e10_neg,anelo_b10_e10,-1,anelo,10,test_anelo,2019-05,2019-12,531830,57
 anelo_b10_e13_neg,anelo_b10_e13,-1,anelo,10,test_anelo,2022-08,2023-03,530150,5766740,EPSG:32719,False,,sofi
 anelo_b10_e2_neg,anelo_b10_e2,-1,anelo,10,test_anelo,2020-05,2020-12,531830,5772460,EPSG:32719,False,,sofi
 anelo_b10_e4_neg,anelo_b10_e4,-1,anelo,10,test_anelo,2022-06,2023-01,528460,5770550,EPSG:32719,False,,sofi
-anelo_b10_e4_897,anelo_b10_e4,897,anelo,10,test_anelo,2022-09,2023-10,528460,5770550,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_sofi),sofi
-anelo_b10_e5_652,anelo_b10_e5,652,anelo,10,test_anelo,2020-01,2021-02,530150,5770550,EPSG:32719,False,"T1 2020-07: pocas observaciones despejadas, mirar con atención; T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_sofi)",sofi
+anelo_b10_e5_652,anelo_b10_e5,652,anelo,10,test_anelo,2019-01,2021-02,530150,5770550,EPSG:32719,False,"T1 2020-07: pocas observaciones despejadas, mirar con atención; T1 corrido a −24 meses: la locación ya se veía; con -12 todavía se ve; limpia en 2019-01",sofi
 anelo_b10_e5_785,anelo_b10_e5,785,anelo,10,test_anelo,2022-01,2022-08,530150,5770550,EPSG:32719,False,,sofi
-anelo_b10_e6_632,anelo_b10_e6,632,anelo,10,test_anelo,2019-10,2020-11,531830,5770550,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_sofi),sofi
+anelo_b10_e6_632,anelo_b10_e6,632,anelo,10,test_anelo,2019-01,2020-11,531830,5770550,EPSG:32719,False,T1 corrido a −24 meses: la locación ya se veía; con -12 todavía se ve; limpia en 2019-01,sofi
 anelo_b10_e6_687,anelo_b10_e6,687,anelo,10,test_anelo,2020-08,2021-09,531830,5770550,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_sofi),sofi
 anelo_b10_e6_881,anelo_b10_e6,881,anelo,10,test_anelo,2022-12,2023-07,531830,5770550,EPSG:32719,False,,sofi
 anelo_b10_e7_neg,anelo_b10_e7,-1,anelo,10,test_anelo,2019-03,2019-10,533520,5770550,EPSG:32719,False,,sofi
@@ -282,9 +281,7 @@ externa_b10_e7_neg,externa_b10_e7,-1,externa,10,test_externo,2021-12,2022-07,493
 externa_b10_e8_neg,externa_b10_e8,-1,externa,10,test_externo,2020-02,2020-09,486900,5757050,EPSG:32719,False,,agus
 externa_b11_e0_748,externa_b11_e0,748,externa,11,test_externo,2021-07,2022-02,495640,5760890,EPSG:32719,False,,sofi
 externa_b11_e0_778,externa_b11_e0,778,externa,11,test_externo,2022-01,2022-08,495640,5760890,EPSG:32719,False,,sofi
-externa_b11_e10_763,externa_b11_e10,763,externa,11,test_externo,2021-04,2022-05,499750,5757060,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_sofi),sofi
 externa_b11_e10_840,externa_b11_e10,840,externa,11,test_externo,2022-12,2023-07,499750,5757060,EPSG:32719,False,"T2 2023-07: pocas observaciones despejadas, mirar con atención",sofi
-externa_b11_e11_845,externa_b11_e11,845,externa,11,test_externo,2022-06,2023-07,501800,5757060,EPSG:32719,False,"T2 2023-07: pocas observaciones despejadas, mirar con atención; T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_sofi)",sofi
 externa_b11_e15_neg,externa_b11_e15,-1,externa,11,test_externo,2021-08,2022-03,501800,5755140,EPSG:32719,False,,sofi
 externa_b11_e3_neg,externa_b11_e3,-1,externa,11,test_externo,2020-04,2020-11,501800,5760890,EPSG:32719,False,,sofi
 externa_b11_e4_805,externa_b11_e4,805,externa,11,test_externo,2022-04,2022-11,495640,5758970,EPSG:32719,False,,sofi

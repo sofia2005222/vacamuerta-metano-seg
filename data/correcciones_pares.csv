@@ -1,18 +1,18 @@
 id,accion,nota
-anelo_b06_e12_677,t1_menos_12,revisión rápida (pares_sofi)
+anelo_b06_e12_677,t1_menos_24,con -12 todavía se ve; limpia en 2019-02
 anelo_b06_e3_683,t1_menos_12,revisión rápida (pares_sofi)
-anelo_b06_e4_750,t1_menos_12,revisión rápida (pares_sofi)
+anelo_b06_e4_750,t1_menos_24,con -12 todavía se ve; limpia en 2020-08
 anelo_b06_e5_612,preexistente,"ya se ve en T1 2019-01, el primer mes del archivo"
 anelo_b07_e15_655,t1_menos_12,revisión rápida (pares_sofi)
-anelo_b10_e4_897,t1_menos_12,revisión rápida (pares_sofi)
-anelo_b10_e5_652,t1_menos_12,revisión rápida (pares_sofi)
-anelo_b10_e6_632,t1_menos_12,revisión rápida (pares_sofi)
+anelo_b10_e4_897,preexistente,"desmontada entre 2019-01 y 2019-04, 4 años y medio antes del pozo (2023-09)"
+anelo_b10_e5_652,t1_menos_24,con -12 todavía se ve; limpia en 2019-01
+anelo_b10_e6_632,t1_menos_24,con -12 todavía se ve; limpia en 2019-01
 anelo_b10_e6_687,t1_menos_12,revisión rápida (pares_sofi)
 externa_b09_e13_719,t1_menos_12,revisión rápida (pares_sofi)
 externa_b09_e14_734,t1_menos_12,revisión rápida (pares_sofi)
 externa_b09_e15_700,t1_menos_12,revisión rápida (pares_sofi)
-externa_b11_e10_763,t1_menos_12,revisión rápida (pares_sofi)
-externa_b11_e11_845,t1_menos_12,revisión rápida (pares_sofi)
+externa_b11_e10_763,preexistente,"desmontada entre 2019-05 y 2019-06, 3 años antes del pozo (2022-04)"
+externa_b11_e11_845,preexistente,"desmontada entre 2019-07 y 2019-10, casi 4 años antes del pozo (2023-06)"
 anelo_b01_e6_694,t1_menos_12,ya se ve en T1 2019-02; probablemente preexistente
 anelo_b01_e6_792,preexistente,"misma locación que la 694 (62 m), ampliada en 2022; ya está en T1 2021-11"
 anelo_b01_e7_815,t1_menos_12,desmonte ya visible en T1 2022-03 (tierra roja recién removida)

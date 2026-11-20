@@ -219,7 +219,7 @@ def aplicar_correcciones(indice, correcciones):
     Correcciones que salen de validar (data/correcciones_pares.csv: id, accion, nota):
       t1_menos_12   la locación ya se veía en T1: T1 pasa de −6 a −12 meses (no antes de enero de 2019)
       t1_menos_24   se desmontó más de un año antes del pozo: T1 pasa a −24 meses (no antes de enero de 2019)
-      preexistente  la locación ya estaba en enero de 2019: el par sale (se anota para #15)
+      preexistente  ya estaba en enero de 2019 (o ni con −24 hay un antes limpio): el par sale (se anota para #15)
     El id del par no cambia; hay que volver a recortarlo y proponerlo (docs/VALIDACION.md).
     """
     corrimiento = {"t1_menos_12": 12, "t1_menos_24": 24}  # meses antes del inicio de perforación
