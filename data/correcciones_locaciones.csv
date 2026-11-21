@@ -4,6 +4,8 @@ locacion_id_a,locacion_id_b,motivo,quien,nota
 763,,preexistente,sofi,"desmontada entre 2019-05 y 2019-06, 3 años antes del pozo (par externa_b11_e10_763)"
 845,,preexistente,sofi,"desmontada entre 2019-07 y 2019-10, casi 4 años antes del pozo (par externa_b11_e11_845)"
 614,,preexistente,agus,"ya se ve en 2019-01, el primer mes del archivo (par anelo_b03_e14_614)"
+779,,preexistente,sofi,"desmontada entre 2019-01 y 2019-02, 3 años antes del pozo (par externa_b08_e12_779)"
+815,,preexistente,sofi,"desmontada entre 2020-02 y 2020-03, 30 meses antes del pozo: ni con -24 hay un antes limpio (par anelo_b01_e7_815)"
 694,,preexistente,agus,"ya se ve en 2019-01, el primer mes del archivo (par anelo_b01_e6_694)"
 792,694,misma_locacion,agus,"a 62 m de la 694, ampliada en 2022 (par anelo_b01_e6_792)"
 635,617,misma_locacion,agus,"pozos agregados en 2020-05 a la locación de la 617 (par anelo_b03_e15_635)"
