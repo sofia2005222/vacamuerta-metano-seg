@@ -101,7 +101,7 @@ anelo_b06_e13_810,t1_menos_12,se ve desmontada en T1
 
 - `t1_menos_12`: T1 pasa de 6 a 12 meses antes del inicio de perforación (no antes de enero de 2019).
 - `t1_menos_24`: igual, a 24 meses, para locaciones desmontadas más de un año antes del pozo (se pone a mano).
-- `preexistente`: la locación ya estaba en enero de 2019, o se desmontó tanto antes del pozo que ni con `t1_menos_24` hay un antes limpio. El par sale del dataset y se anota para el #15.
+- `preexistente`: la locación ya estaba en enero de 2019, o se desmontó tanto antes del pozo que ni con `t1_menos_24` hay un antes limpio. El par sale del dataset y la locación se anota en `data/correcciones_locaciones.csv`.
 
 Sofi regenera ese par (ver abajo) y lo vuelve a subir con el mismo `id`; se baja de nuevo de `pares/` y se valida.
 

@@ -43,11 +43,13 @@ Los `.geojson` se abren directo en QGIS o Google Earth Engine.
 | `bloque_anelo` | Bloque de la grilla 4×4 (solo zona Añelo) |
 | `split` | `train`, `val`, `test_anelo`, `test_externo` o vacío (fuera de ambas zonas) |
 | `empresa`, `area`, `siglas` | Operadora, área de concesión y siglas de los pozos |
+| `correccion` | Vacía, `preexistente` (ya estaba desmontada en enero de 2019, o mucho antes del pozo: no es nueva) o `misma_locacion` (la agrupación partió una locación). Sale de `correcciones_locaciones.csv` |
+| `misma_que` | Si `correccion` es `misma_locacion`: la locación de la que es parte |
 
 **Advertencias:**
 - **Usar `fecha_primer_pozo` (inicio de perforación), no `primera_produccion`.** La primera producción del padrón muchas veces aparece antes del fin de la terminación del pozo, lo cual no tiene sentido físico; probablemente sea el primer mes declarado en el sistema.
 - Las coordenadas son de boca de pozo; la locación desmontada es más grande (en EE. UU. miden 50–250 m, o sea 5–25 píxeles en Sentinel-2).
-- La agrupación por distancia es aproximada: una locación con varias filas de pozos puede quedar partida en dos. Cuando eso se ve al validar máscaras, se anota en `data/correcciones_locaciones.csv` ("la locación X y la Y son la misma") y `armar_dataset.py` aplica las correcciones al regenerar.
+- La agrupación por distancia es aproximada: una locación con varias filas de pozos puede quedar partida en dos. Además, algunas locaciones "nuevas" ya estaban desmontadas en enero de 2019. Lo que aparece al validar los pares se anota en `data/correcciones_locaciones.csv` (`locacion_id_a, locacion_id_b, motivo, quien, nota`; motivo `preexistente` o `misma_locacion`, con `b` la locación de la que `a` es parte) y `armar_dataset.py` lo aplica al regenerar. **Las correcciones se marcan en las columnas `correccion` y `misma_que`, no se borran filas ni se juntan pozos:** si cambiara la cantidad de locaciones nuevas, `armar_pares` armaría otros negativos y se perderían pares ya validados. Para marcar el padrón sin regenerarlo (el archivo de fechas de primera producción no está en el repo): `python -m vmseg.correcciones_locaciones`.
 - 35 pozos sin fecha de primera producción y algunos sin fecha de perforación.
 - **Los puntos no son las etiquetas del modelo:** las máscaras se dibujan sobre la imagen.
 - **Solo Vaca Muerta no convencional:** las locaciones de pozos convencionales o de otras formaciones no están en estos archivos, pero se ven igual desde el satélite y van en las máscaras. Para eso está `pozos_todos.csv`, con todas las bocas de pozo del padrón en las zonas (descargado el 18 de noviembre de 2026).
