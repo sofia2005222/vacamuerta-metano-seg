@@ -57,7 +57,8 @@ class ParesDataset(Dataset):
     def find_files(self):
         """ids de los pares del split, según indice.csv."""
         indice = leer_indice_pares(self.config.data_root)
-        return list(indice[indice["split"] == self.split]["id"])
+        return list(indice[(indice["split"] == self.split) & indice["validada"]]["id"])
+
 
     def canales_por_fecha(self):
         return len(self.config.bandas) + (len(INDICES) if self.config.indices else 0)

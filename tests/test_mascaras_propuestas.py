@@ -236,7 +236,7 @@ def test_rgb8_y_ndvi():
 
 
 def test_linea_de_comandos_valida_todos(tmp_path, capsys):
-    indice = generar_pares_falsos(tmp_path, n=2, tamano=32, semilla=1)
+    indice = generar_pares_falsos(tmp_path, n=2, tamano=32, semilla=1, validada=False)
     t = _transform(indice["x_min"][0], indice["y_max"][0])
     pol = gpd.GeoDataFrame({"clase": [LOCACION], "origen": ["manual"], "locacion_id": [-1],
                             "verificar": [0], "nota": [""]},

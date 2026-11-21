@@ -88,7 +88,7 @@ def rectangulo_libre(rng, ocupado, tamano):
     return None
 
 
-def generar_pares_falsos(carpeta, n=8, tamano=TAMANO, semilla=42, frac_negativos=0.25):
+def generar_pares_falsos(carpeta, n=8, tamano=TAMANO, semilla=42, frac_negativos=0.25, validada=True):
     """
     Genera n pares falsos con el formato real, para probar sin imágenes.
 
@@ -162,7 +162,7 @@ def generar_pares_falsos(carpeta, n=8, tamano=TAMANO, semilla=42, frac_negativos
         filas.append(dict(
             id=id_par, encuadre=encuadre, locacion_id=locacion_id, zona=zona,
             bloque=bloque, split=split, mes_t1="2021-01", mes_t2="2021-08",
-            x_min=x_min, y_max=y_max, crs=CRS, validada=False, nota="falso",
+            x_min=x_min, y_max=y_max, crs=CRS, validada=validada, nota="falso",
         ))
 
     indice = pd.DataFrame(filas, columns=COLUMNAS_INDICE_PARES)
