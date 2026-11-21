@@ -241,7 +241,7 @@ def main(
     return history
 
 def guardar_curvas(history, ruta):
-    """Guarda como imagen las curvas de entrenamiento: loss por iteración y, por época, loss y mIoU."""
+    """Guarda como imagen las curvas de entrenamiento: loss por iteración y, por época, loss e IoU de locación."""
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(1, 3, figsize=(18, 4))
@@ -258,7 +258,7 @@ def guardar_curvas(history, ruta):
 
     axes[2].plot(history["train_miou"], "-o", label="train")
     axes[2].plot(history["valid_miou"], "-o", label="val")
-    axes[2].set_title("mIoU (locación y pileta)")
+    axes[2].set_title("IoU de locación")
     axes[2].set_xlabel("Epoch")
     axes[2].legend()
 

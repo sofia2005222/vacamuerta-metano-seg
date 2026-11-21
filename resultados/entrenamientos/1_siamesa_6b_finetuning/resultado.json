@@ -1,0 +1,25 @@
+{
+  "nombre": "1_siamesa_6b_finetuning",
+  "arquitectura": "siamesa",
+  "bandas": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "indices": false,
+  "modo": "finetuning",
+  "epocas": 50,
+  "lr": 0.001,
+  "pesos_clases": [
+    1.0,
+    10.0
+  ],
+  "iou_val": 0.7447,
+  "mejor_epoca": 21,
+  "iou_val_ult10": 0.6861,
+  "pares_train": 113,
+  "pares_val": 29
+}

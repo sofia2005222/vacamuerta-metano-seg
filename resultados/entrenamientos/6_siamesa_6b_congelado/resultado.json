@@ -1,0 +1,25 @@
+{
+  "nombre": "6_siamesa_6b_congelado",
+  "arquitectura": "siamesa",
+  "bandas": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "indices": false,
+  "modo": "congelado",
+  "epocas": 50,
+  "lr": 0.001,
+  "pesos_clases": [
+    1.0,
+    10.0
+  ],
+  "iou_val": 0.7342,
+  "mejor_epoca": 34,
+  "iou_val_ult10": 0.6724,
+  "pares_train": 113,
+  "pares_val": 29
+}

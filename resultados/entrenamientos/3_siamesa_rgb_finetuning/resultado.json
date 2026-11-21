@@ -1,0 +1,22 @@
+{
+  "nombre": "3_siamesa_rgb_finetuning",
+  "arquitectura": "siamesa",
+  "bandas": [
+    2,
+    1,
+    0
+  ],
+  "indices": false,
+  "modo": "finetuning",
+  "epocas": 50,
+  "lr": 0.001,
+  "pesos_clases": [
+    1.0,
+    10.0
+  ],
+  "iou_val": 0.6581,
+  "mejor_epoca": 39,
+  "iou_val_ult10": 0.6396,
+  "pares_train": 113,
+  "pares_val": 29
+}
