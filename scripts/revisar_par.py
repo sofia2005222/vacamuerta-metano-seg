@@ -69,6 +69,24 @@ def es_compacta(region):
     return lleno > 0.55 and lados[0] / max(lados[1], 1e-6) > 0.3
 
 
+def leer_revision():
+    """{id: decisión} de <carpeta>/revision.csv, el mismo archivo que usa `python -m vmseg.revisar`."""
+    ruta = os.path.join(CARPETA, "revision.csv")
+    if not os.path.exists(ruta):
+        return {}
+    r = pd.read_csv(ruta)
+    return dict(zip(r["id"], r["decision"]))
+
+
+def guardar_decision(id_par, decision):
+    from datetime import datetime
+    revision = leer_revision()
+    revision[id_par] = decision
+    pd.DataFrame({"id": list(revision), "decision": list(revision.values()),
+                  "fecha": datetime.now().isoformat(timespec="seconds")}).to_csv(
+        os.path.join(CARPETA, "revision.csv"), index=False)
+
+
 def rutas(id_par):
     base = os.path.join(CARPETA, id_par)
     return {k: f"{base}_{k}.tif" for k in ("t1", "t2", "dndvi")} | {"gpkg": f"{base}_propuesta.gpkg"}
@@ -339,6 +357,7 @@ def rectangulo(id_par, fila0, col0, fila1, col1, nueva_clase="1"):
 
 def ok(id_par):
     mask = validar_par(CARPETA, id_par)
+    guardar_decision(id_par, "aceptar")
     print(f"Validado {id_par}: {int((mask == 1).sum())} píxeles de locación, {int((mask == 2).sum())} de pileta.")
 
 
@@ -357,16 +376,15 @@ def corregir(id_par, accion, *texto):
         correcciones = pd.DataFrame(columns=["id", "accion", "nota"])
     fila = pd.DataFrame([{"id": id_par, "accion": accion, "nota": " ".join(texto)}])
     pd.concat([correcciones, fila], ignore_index=True).to_csv(ruta, index=False)
+    guardar_decision(id_par, accion)
     print(f"Anotado en {ruta}: {id_par} -> {accion}. Este par no se valida; Sofi lo regenera.")
 
 
 def pendientes():
-    """Pares sin validar ni corregir, primero los positivos."""
+    """Pares del índice sin decisión en revision.csv, primero los positivos."""
     indice = leer_indice_pares(CARPETA)
-    corregidos = set()
-    if os.path.exists("data/correcciones_pares.csv"):
-        corregidos = set(pd.read_csv("data/correcciones_pares.csv")["id"])
-    faltan = indice[(indice["validada"] != True) & ~indice["id"].isin(corregidos)]
+    decididos = set(leer_revision())
+    faltan = indice[~indice["id"].isin(decididos)]
     return indice, faltan.assign(negativo=faltan["id"].str.endswith("_neg")).sort_values(["negativo", "id"])
 
 
