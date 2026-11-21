@@ -55,7 +55,6 @@ anelo_b04_e6_neg,anelo_b04_e6,-1,anelo,4,train,2022-04,2022-11,516500,5762290,EP
 anelo_b04_e8_neg,anelo_b04_e8,-1,anelo,4,train,2022-06,2023-01,513130,5760370,EPSG:32719,False,,agus
 anelo_b05_e0_neg,anelo_b05_e0,-1,anelo,5,train,2021-10,2022-05,520780,5764170,EPSG:32719,False,,bian
 anelo_b05_e1_neg,anelo_b05_e1,-1,anelo,5,train,2019-05,2019-12,522460,5764170,EPSG:32719,False,,bian
-anelo_b05_e1_791,anelo_b05_e1,791,anelo,5,train,2021-09,2022-04,522460,5764170,EPSG:32719,False,,bian
 anelo_b05_e11_neg,anelo_b05_e11,-1,anelo,5,train,2021-04,2021-11,525830,5760350,EPSG:32719,False,,bian
 anelo_b05_e11_853,anelo_b05_e11,853,anelo,5,train,2022-06,2023-01,525830,5760350,EPSG:32719,False,,bian
 anelo_b05_e12_667,anelo_b05_e12,667,anelo,5,train,2019-05,2019-12,520780,5758440,EPSG:32719,False,,bian
@@ -63,8 +62,8 @@ anelo_b05_e12_973,anelo_b05_e12,973,anelo,5,train,2023-05,2023-12,520780,5758440
 anelo_b05_e13_neg,anelo_b05_e13,-1,anelo,5,train,2020-06,2021-01,522460,5758440,EPSG:32719,False,,bian
 anelo_b05_e14_neg,anelo_b05_e14,-1,anelo,5,train,2021-08,2022-03,524150,5758440,EPSG:32719,False,,bian
 anelo_b05_e2_893,anelo_b05_e2,893,anelo,5,train,2022-11,2023-06,524150,5764170,EPSG:32719,False,,bian
-anelo_b05_e3_821,anelo_b05_e3,821,anelo,5,train,2022-01,2022-08,525830,5764170,EPSG:32719,False,,bian
-anelo_b05_e3_960,anelo_b05_e3,960,anelo,5,train,2023-05,2023-12,525830,5764170,EPSG:32719,False,,bian
+anelo_b05_e3_821,anelo_b05_e3,821,anelo,5,train,2021-07,2022-08,525830,5764170,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian),bian
+anelo_b05_e3_960,anelo_b05_e3,960,anelo,5,train,2021-11,2023-12,525830,5764170,EPSG:32719,False,T1 corrido a −24 meses: la locación ya se veía; con -12 y -18 todavía se ve; limpia en 2021-11,bian
 anelo_b05_e5_neg,anelo_b05_e5,-1,anelo,5,train,2021-05,2021-12,522460,5762260,EPSG:32719,False,,bian
 anelo_b05_e7_705,anelo_b05_e7,705,anelo,5,train,2019-07,2020-02,525830,5762260,EPSG:32719,False,,bian
 anelo_b05_e7_773,anelo_b05_e7,773,anelo,5,train,2019-09,2020-04,525830,5762260,EPSG:32719,False,,bian
@@ -119,7 +118,7 @@ anelo_b08_e7_neg,anelo_b08_e7,-1,anelo,8,train,2021-11,2022-06,518210,5770610,EP
 anelo_b09_e0_neg,anelo_b09_e0,-1,anelo,9,train,2022-02,2022-09,520800,5772490,EPSG:32719,False,,bian
 anelo_b09_e1_neg,anelo_b09_e1,-1,anelo,9,train,2021-12,2022-07,522490,5772490,EPSG:32719,False,,bian
 anelo_b09_e10_918,anelo_b09_e10,918,anelo,9,train,2022-12,2023-07,524170,5768680,EPSG:32719,False,,bian
-anelo_b09_e11_665,anelo_b09_e11,665,anelo,9,train,2019-06,2020-01,525860,5768680,EPSG:32719,False,"T1 2019-06: pocas observaciones despejadas, mirar con atención",bian
+anelo_b09_e11_665,anelo_b09_e11,665,anelo,9,train,2019-01,2020-01,525860,5768680,EPSG:32719,False,"T1 2019-06: pocas observaciones despejadas, mirar con atención; T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian)",bian
 anelo_b09_e11_neg,anelo_b09_e11,-1,anelo,9,train,2021-01,2021-08,525860,5768680,EPSG:32719,False,,bian
 anelo_b09_e11_863,anelo_b09_e11,863,anelo,9,train,2022-07,2023-02,525860,5768680,EPSG:32719,False,,bian
 anelo_b09_e11_939,anelo_b09_e11,939,anelo,9,train,2023-05,2023-12,525860,5768680,EPSG:32719,False,,bian
@@ -128,13 +127,11 @@ anelo_b09_e15_847,anelo_b09_e15,847,anelo,9,train,2022-05,2022-12,525860,5766770
 anelo_b09_e15_972,anelo_b09_e15,972,anelo,9,train,2023-03,2023-10,525860,5766770,EPSG:32719,False,,bian
 anelo_b09_e2_neg,anelo_b09_e2,-1,anelo,9,train,2021-08,2022-03,524170,5772490,EPSG:32719,False,,bian
 anelo_b09_e2_959,anelo_b09_e2,959,anelo,9,train,2023-03,2023-10,524170,5772490,EPSG:32719,False,,bian
-anelo_b09_e3_639,anelo_b09_e3,639,anelo,9,train,2019-05,2019-12,525860,5772490,EPSG:32719,False,,bian
+anelo_b09_e3_639,anelo_b09_e3,639,anelo,9,train,2019-01,2019-12,525860,5772490,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian),bian
 anelo_b09_e3_neg,anelo_b09_e3,-1,anelo,9,train,2020-01,2020-08,525860,5772490,EPSG:32719,False,,bian
 anelo_b09_e3_728,anelo_b09_e3,728,anelo,9,train,2021-05,2021-12,525860,5772490,EPSG:32719,False,,bian
-anelo_b09_e4_882,anelo_b09_e4,882,anelo,9,train,2023-01,2023-08,520800,5770580,EPSG:32719,False,,bian
 anelo_b09_e6_neg,anelo_b09_e6,-1,anelo,9,train,2022-04,2022-11,524170,5770580,EPSG:32719,False,,bian
 anelo_b09_e6_947,anelo_b09_e6,947,anelo,9,train,2023-04,2023-11,524170,5770580,EPSG:32719,False,"T1 2023-04: pocas observaciones despejadas, mirar con atención",bian
-anelo_b09_e7_851,anelo_b09_e7,851,anelo,9,train,2022-10,2023-05,525860,5770580,EPSG:32719,False,,bian
 anelo_b10_e10_neg,anelo_b10_e10,-1,anelo,10,test_anelo,2019-05,2019-12,531830,5768650,EPSG:32719,False,,sofi
 anelo_b10_e13_neg,anelo_b10_e13,-1,anelo,10,test_anelo,2022-08,2023-03,530150,5766740,EPSG:32719,False,,sofi
 anelo_b10_e2_neg,anelo_b10_e2,-1,anelo,10,test_anelo,2020-05,2020-12,531830,5772460,EPSG:32719,False,,sofi
@@ -190,16 +187,16 @@ anelo_b14_e12_neg,anelo_b14_e12,-1,anelo,14,test_anelo,2022-04,2022-11,528490,57
 anelo_b14_e2_837,anelo_b14_e2,837,anelo,14,test_anelo,2022-03,2022-10,531870,5780790,EPSG:32719,False,también la locación 838,bian
 anelo_b14_e3_938,anelo_b14_e3,938,anelo,14,test_anelo,2023-02,2023-09,533560,5780790,EPSG:32719,False,,bian
 anelo_b14_e3_1044,anelo_b14_e3,1044,anelo,14,test_anelo,2023-05,2023-12,533560,5780790,EPSG:32719,False,,bian
-anelo_b14_e6_621,anelo_b14_e6,621,anelo,14,test_anelo,2019-08,2020-03,531870,5778880,EPSG:32719,False,,bian
+anelo_b14_e6_621,anelo_b14_e6,621,anelo,14,test_anelo,2019-02,2020-03,531870,5778880,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian),bian
 anelo_b14_e7_neg,anelo_b14_e7,-1,anelo,14,test_anelo,2020-02,2020-09,533560,5778880,EPSG:32719,False,,bian
 anelo_b14_e7_908,anelo_b14_e7,908,anelo,14,test_anelo,2023-05,2023-12,533560,5778880,EPSG:32719,False,,bian
 anelo_b14_e8_neg,anelo_b14_e8,-1,anelo,14,test_anelo,2022-08,2023-03,528490,5776970,EPSG:32719,False,,bian
 anelo_b15_e0_766,anelo_b15_e0,766,anelo,15,test_anelo,2021-06,2022-01,536160,5780750,EPSG:32719,False,"T1 2021-06: pocas observaciones despejadas, mirar con atención",bian
 anelo_b15_e2_neg,anelo_b15_e2,-1,anelo,15,test_anelo,2019-10,2020-05,539530,5780750,EPSG:32719,False,,bian
-anelo_b15_e2_703,anelo_b15_e2,703,anelo,15,test_anelo,2020-12,2021-07,539530,5780750,EPSG:32719,False,,bian
+anelo_b15_e2_703,anelo_b15_e2,703,anelo,15,test_anelo,2020-06,2021-07,539530,5780750,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian),bian
 anelo_b15_e2_788,anelo_b15_e2,788,anelo,15,test_anelo,2021-08,2022-03,539530,5780750,EPSG:32719,False,,bian
-anelo_b15_e3_871,anelo_b15_e3,871,anelo,15,test_anelo,2022-10,2023-05,541220,5780750,EPSG:32719,False,,bian
-anelo_b15_e3_936,anelo_b15_e3,936,anelo,15,test_anelo,2023-05,2023-12,541220,5780750,EPSG:32719,False,,bian
+anelo_b15_e3_871,anelo_b15_e3,871,anelo,15,test_anelo,2022-04,2023-05,541220,5780750,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian),bian
+anelo_b15_e3_936,anelo_b15_e3,936,anelo,15,test_anelo,2022-11,2023-12,541220,5780750,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian),bian
 anelo_b15_e4_neg,anelo_b15_e4,-1,anelo,15,test_anelo,2019-03,2019-10,536160,5778840,EPSG:32719,False,,bian
 anelo_b15_e5_neg,anelo_b15_e5,-1,anelo,15,test_anelo,2019-01,2019-08,537850,5778840,EPSG:32719,False,,bian
 anelo_b15_e5_757,anelo_b15_e5,757,anelo,15,test_anelo,2021-09,2022-04,537850,5778840,EPSG:32719,False,,bian
@@ -231,18 +228,17 @@ externa_b04_e13_neg,externa_b04_e13,-1,externa,4,test_externo,2021-12,2022-07,48
 externa_b04_e15_neg,externa_b04_e15,-1,externa,4,test_externo,2019-03,2019-10,493070,5738500,EPSG:32719,False,,agus
 externa_b05_e0_neg,externa_b05_e0,-1,externa,5,test_externo,2021-07,2022-02,495650,5744250,EPSG:32719,False,,bian
 externa_b05_e1_672,externa_b05_e1,672,externa,5,test_externo,2020-09,2021-04,497700,5744250,EPSG:32719,False,,bian
-externa_b05_e1_825,externa_b05_e1,825,externa,5,test_externo,2022-02,2022-09,497700,5744250,EPSG:32719,False,,bian
+externa_b05_e1_825,externa_b05_e1,825,externa,5,test_externo,2021-08,2022-09,497700,5744250,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian),bian
 externa_b05_e10_neg,externa_b05_e10,-1,externa,5,test_externo,2021-12,2022-07,499740,5740420,EPSG:32719,False,,bian
 externa_b05_e11_neg,externa_b05_e11,-1,externa,5,test_externo,2022-02,2022-09,501790,5740420,EPSG:32719,False,,bian
 externa_b05_e2_875,externa_b05_e2,875,externa,5,test_externo,2022-05,2022-12,499740,5744250,EPSG:32719,False,,bian
 externa_b05_e4_neg,externa_b05_e4,-1,externa,5,test_externo,2019-01,2019-08,495650,5742330,EPSG:32719,False,,bian
-externa_b05_e4_895,externa_b05_e4,895,externa,5,test_externo,2022-06,2023-01,495650,5742330,EPSG:32719,False,,bian
-externa_b05_e4_915,externa_b05_e4,915,externa,5,test_externo,2022-09,2023-04,495650,5742330,EPSG:32719,False,"T2 2023-04: pocas observaciones despejadas, mirar con atención",bian
+externa_b05_e4_895,externa_b05_e4,895,externa,5,test_externo,2021-12,2023-01,495650,5742330,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian),bian
+externa_b05_e4_915,externa_b05_e4,915,externa,5,test_externo,2022-03,2023-04,495650,5742330,EPSG:32719,False,"T2 2023-04: pocas observaciones despejadas, mirar con atención; T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_bian)",bian
 externa_b05_e5_neg,externa_b05_e5,-1,externa,5,test_externo,2019-03,2019-10,497700,5742330,EPSG:32719,False,,bian
 externa_b05_e8_729,externa_b05_e8,729,externa,5,test_externo,2021-01,2021-08,495650,5740420,EPSG:32719,False,,bian
 externa_b05_e8_730,externa_b05_e8,730,externa,5,test_externo,2021-03,2021-10,495650,5740420,EPSG:32719,False,,bian
 externa_b05_e8_747,externa_b05_e8,747,externa,5,test_externo,2021-06,2022-01,495650,5740420,EPSG:32719,False,,bian
-externa_b06_e2_616,externa_b06_e2,616,externa,6,test_externo,2019-02,2019-09,482280,5752540,EPSG:32719,False,,bian
 externa_b06_e3_784,externa_b06_e3,784,externa,6,test_externo,2021-07,2022-02,484330,5752540,EPSG:32719,False,,bian
 externa_b06_e3_818,externa_b06_e3,818,externa,6,test_externo,2021-09,2022-04,484330,5752540,EPSG:32719,False,,bian
 externa_b06_e3_832,externa_b06_e3,832,externa,6,test_externo,2021-10,2022-05,484330,5752540,EPSG:32719,False,,bian
