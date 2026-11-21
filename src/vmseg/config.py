@@ -35,13 +35,15 @@ class TrainingConfig:
         learning_rate=1e-3,
         weight_decay=1e-4,
         checkpoints_dir="runs/prueba",
-        device="cpu"
+        device="cpu",
+        pesos_clases=None,
     ):
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
         self.checkpoints_dir = checkpoints_dir
         self.device = device
+        self.pesos_clases = pesos_clases
 
 
 def deterministic(seed=42):

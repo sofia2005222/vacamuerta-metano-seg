@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from vmseg.config import DatasetConfig
 from vmseg.par import leer_indice_pares, leer_par
-from vmseg.recorte import BANDAS
+from vmseg.recorte import BANDAS, LOCACION, PILETA
 
 # posición de cada banda en el recorte
 B2, B4, B8, B11 = (BANDAS.index(b) for b in ("B2", "B4", "B8", "B11"))
@@ -89,6 +89,10 @@ class ParesDataset(Dataset):
         img_t1, img_t2, mask = leer_par(self.config.data_root, self.ids[idx])
         t1 = preparar_fecha(img_t1, self.config.bandas, self.config.indices)
         t2 = preparar_fecha(img_t2, self.config.bandas, self.config.indices)
+        if self.config.num_classes == 2:
+            # sin clase pileta: el hueco de la pileta es parte de la locación
+            mask = np.where(mask == PILETA, LOCACION, mask)
+
         return t1, t2, mask
 
     def __getitem__(self, idx):
