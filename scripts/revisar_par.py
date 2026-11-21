@@ -79,12 +79,13 @@ def leer_revision():
 
 
 def guardar_decision(id_par, decision):
+    """Anota (o reemplaza) la decisión de un par en revision.csv; las demás filas conservan su fecha."""
     from datetime import datetime
-    revision = leer_revision()
-    revision[id_par] = decision
-    pd.DataFrame({"id": list(revision), "decision": list(revision.values()),
-                  "fecha": datetime.now().isoformat(timespec="seconds")}).to_csv(
-        os.path.join(CARPETA, "revision.csv"), index=False)
+    ruta = os.path.join(CARPETA, "revision.csv")
+    revision = pd.read_csv(ruta) if os.path.exists(ruta) else pd.DataFrame(columns=["id", "decision", "fecha"])
+    fila = pd.DataFrame([{"id": id_par, "decision": decision,
+                          "fecha": datetime.now().isoformat(timespec="seconds")}])
+    pd.concat([revision[revision["id"] != id_par], fila], ignore_index=True).to_csv(ruta, index=False)
 
 
 def rutas(id_par):
