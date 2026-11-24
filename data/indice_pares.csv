@@ -14,10 +14,8 @@ anelo_b01_e14_neg,anelo_b01_e14,-1,anelo,1,val,2019-03,2019-10,524130,5750120,EP
 anelo_b01_e2_715,anelo_b01_e2,715,anelo,1,val,2019-06,2020-01,524130,5755850,EPSG:32719,False,"T1 2019-06: pocas observaciones despejadas, mirar con atención",agus
 anelo_b01_e3_793,anelo_b01_e3,793,anelo,1,val,2021-08,2022-03,525810,5755850,EPSG:32719,False,,agus
 anelo_b01_e5_neg,anelo_b01_e5,-1,anelo,1,val,2022-08,2023-03,522440,5753940,EPSG:32719,False,,agus
-anelo_b01_e6_694,anelo_b01_e6,694,anelo,1,val,2019-01,2019-09,524130,5753940,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; ya se ve en T1 2019-02; probablemente preexistente,agus
 anelo_b01_e6_neg,anelo_b01_e6,-1,anelo,1,val,2020-02,2020-09,524130,5753940,EPSG:32719,False,,agus
 anelo_b01_e6_745,anelo_b01_e6,745,anelo,1,val,2021-04,2021-11,524130,5753940,EPSG:32719,False,,agus
-anelo_b01_e7_815,anelo_b01_e7,815,anelo,1,val,2021-09,2022-10,525810,5753940,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; desmonte ya visible en T1 2022-03 (tierra roja recién removida),agus
 anelo_b02_e0_neg,anelo_b02_e0,-1,anelo,2,train,2021-03,2021-10,528400,5755820,EPSG:32719,False,,agus
 anelo_b02_e11_702,anelo_b02_e11,702,anelo,2,train,2019-08,2020-03,533440,5752010,EPSG:32719,False,,agus
 anelo_b02_e14_878,anelo_b02_e14,878,anelo,2,train,2022-05,2022-12,531760,5750100,EPSG:32719,False,,agus
@@ -168,13 +166,13 @@ anelo_b12_e3_neg,anelo_b12_e3,-1,anelo,12,test_anelo,2019-03,2019-10,518230,5780
 anelo_b12_e6_neg,anelo_b12_e6,-1,anelo,12,test_anelo,2021-11,2022-06,516540,5778930,EPSG:32719,False,,bian
 anelo_b12_e9_neg,anelo_b12_e9,-1,anelo,12,test_anelo,2022-05,2022-12,514840,5777010,EPSG:32719,False,,bian
 anelo_b13_e0_neg,anelo_b13_e0,-1,anelo,13,train,2019-11,2020-06,520820,5780820,EPSG:32719,False,,agus
-anelo_b13_e11_693,anelo_b13_e11,693,anelo,13,train,2020-05,2021-06,525890,5777000,EPSG:32719,False,"T2 2021-06: pocas observaciones despejadas, mirar con atención; T1 corrido a −12 meses: la locación ya se veía; la locación ya está en T1 2020-11",agus
+anelo_b13_e11_693,anelo_b13_e11,693,anelo,13,train,2019-05,2021-06,525890,5777000,EPSG:32719,False,"T2 2021-06: pocas observaciones despejadas, mirar con atención; T1 corrido a −24 meses: la locación ya se veía; también se ve en T1 2020-05, con equipos: con -12 no alcanza, como la 717",agus
 anelo_b13_e11_862,anelo_b13_e11,862,anelo,13,train,2022-08,2023-03,525890,5777000,EPSG:32719,False,,agus
 anelo_b13_e15_872,anelo_b13_e15,872,anelo,13,train,2022-09,2023-04,525890,5775090,EPSG:32719,False,"T2 2023-04: pocas observaciones despejadas, mirar con atención",agus
 anelo_b13_e2_neg,anelo_b13_e2,-1,anelo,13,train,2020-06,2021-01,524200,5780820,EPSG:32719,False,,agus
 anelo_b13_e2_944,anelo_b13_e2,944,anelo,13,train,2023-06,2023-12,524200,5780820,EPSG:32719,False,T2 = 2023-12: no hay imágenes después,agus
+anelo_b13_e3_676,anelo_b13_e3,676,anelo,13,train,2019-02,2021-03,525890,5780820,EPSG:32719,False,"T1 corrido a −24 meses: la locación ya se veía; desmontada entre 2020-01 y 2020-02 (13 meses antes del pozo): con -24 el T1 queda en 2019-02, limpio",agus
 anelo_b13_e3_722,anelo_b13_e3,722,anelo,13,train,2019-05,2019-12,525890,5780820,EPSG:32719,False,,agus
-anelo_b13_e3_676,anelo_b13_e3,676,anelo,13,train,2020-02,2021-03,525890,5780820,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; la locación ya está en T1 2020-08,agus
 anelo_b13_e3_790,anelo_b13_e3,790,anelo,13,train,2021-02,2021-09,525890,5780820,EPSG:32719,False,,agus
 anelo_b13_e3_846,anelo_b13_e3,846,anelo,13,train,2022-07,2023-02,525890,5780820,EPSG:32719,False,,agus
 anelo_b13_e4_neg,anelo_b13_e4,-1,anelo,13,train,2020-04,2020-11,520820,5778910,EPSG:32719,False,,agus
@@ -247,13 +245,12 @@ externa_b07_e10_neg,externa_b07_e10,-1,externa,7,test_externo,2021-05,2021-12,49
 externa_b07_e7_neg,externa_b07_e7,-1,externa,7,test_externo,2022-07,2023-02,493070,5750650,EPSG:32719,False,,agus
 externa_b08_e11_neg,externa_b08_e11,-1,externa,8,test_externo,2019-08,2020-03,501800,5748740,EPSG:32719,False,,agus
 externa_b08_e12_648,externa_b08_e12,648,externa,8,test_externo,2020-06,2021-01,495640,5746820,EPSG:32719,False,,agus
-externa_b08_e12_779,externa_b08_e12,779,externa,8,test_externo,2021-03,2022-04,495640,5746820,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; la locación ya está en T1 2021-09; la nueva de al lado es la 772,agus
 externa_b08_e12_772,externa_b08_e12,772,externa,8,test_externo,2021-11,2022-06,495640,5746820,EPSG:32719,False,,agus
 externa_b08_e12_794,externa_b08_e12,794,externa,8,test_externo,2021-12,2022-07,495640,5746820,EPSG:32719,False,,agus
 externa_b08_e12_987,externa_b08_e12,987,externa,8,test_externo,2023-05,2023-12,495640,5746820,EPSG:32719,False,,agus
-externa_b08_e13_664,externa_b08_e13,664,externa,8,test_externo,2019-10,2020-11,497690,5746820,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; la locación ya está en T1 2020-04,agus
+externa_b08_e13_664,externa_b08_e13,664,externa,8,test_externo,2019-01,2020-11,497690,5746820,EPSG:32719,False,"T1 corrido a −24 meses: la locación ya se veía; desmontada entre 2019-04 y 2019-05 (17 meses antes del pozo): con -24 el T1 queda en 2019-01, limpio",agus
 externa_b08_e13_neg,externa_b08_e13,-1,externa,8,test_externo,2021-02,2021-09,497690,5746820,EPSG:32719,False,,agus
-externa_b08_e15_675,externa_b08_e15,675,externa,8,test_externo,2020-03,2021-04,501800,5746820,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; la locación ya está en T1 2020-09,agus
+externa_b08_e15_675,externa_b08_e15,675,externa,8,test_externo,2019-03,2021-04,501800,5746820,EPSG:32719,False,"T1 corrido a −24 meses: la locación ya se veía; desmontada entre 2019-08 y 2019-09 (19 meses antes del pozo): con -24 el T1 queda en 2019-03, limpio",agus
 externa_b08_e15_935,externa_b08_e15,935,externa,8,test_externo,2021-10,2022-05,501800,5746820,EPSG:32719,False,,agus
 externa_b08_e9_neg,externa_b08_e9,-1,externa,8,test_externo,2022-06,2023-01,497690,5748740,EPSG:32719,False,,agus
 externa_b09_e12_820,externa_b09_e12,820,externa,9,test_externo,2022-04,2022-11,478170,5755130,EPSG:32719,False,,sofi

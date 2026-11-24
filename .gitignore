@@ -19,6 +19,7 @@ data/*
 !data/indice_imagenes.csv
 !data/indice_pares.csv
 !data/correcciones_pares.csv
+!data/correcciones_locaciones.csv
 runs/
 *.pt
 *.pth

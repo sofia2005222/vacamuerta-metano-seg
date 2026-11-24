@@ -13,18 +13,18 @@ externa_b09_e14_734,t1_menos_12,revisión rápida (pares_sofi)
 externa_b09_e15_700,t1_menos_12,revisión rápida (pares_sofi)
 externa_b11_e10_763,preexistente,"desmontada entre 2019-05 y 2019-06, 3 años antes del pozo (2022-04)"
 externa_b11_e11_845,preexistente,"desmontada entre 2019-07 y 2019-10, casi 4 años antes del pozo (2023-06)"
-anelo_b01_e6_694,t1_menos_12,ya se ve en T1 2019-02; probablemente preexistente
+anelo_b01_e6_694,preexistente,"ya está en T1 2019-01, el primer mes del archivo"
 anelo_b01_e6_792,preexistente,"misma locación que la 694 (62 m), ampliada en 2022; ya está en T1 2021-11"
-anelo_b01_e7_815,t1_menos_12,desmonte ya visible en T1 2022-03 (tierra roja recién removida)
+anelo_b01_e7_815,preexistente,"desmontada entre 2020-02 y 2020-03, 30 meses antes del pozo (2022-09): ni con -24 hay un antes limpio, como la 791"
 anelo_b02_e6_854,preexistente,la 854 se perforó sobre la locación de la 394 (2016); ya está en T1 2021-12
 anelo_b03_e11_634,t1_menos_12,la locación ya está en T1 2019-11
 anelo_b03_e14_614,preexistente,"la locación ya está en T1 2019-01, el primer mes del archivo"
 anelo_b03_e15_635,preexistente,misma locación que la 617 (pozos agregados en 2020-05); ya está en T1 2019-11
-anelo_b13_e11_693,t1_menos_12,la locación ya está en T1 2020-11
-anelo_b13_e3_676,t1_menos_12,la locación ya está en T1 2020-08
-externa_b08_e12_779,t1_menos_12,la locación ya está en T1 2021-09; la nueva de al lado es la 772
-externa_b08_e13_664,t1_menos_12,la locación ya está en T1 2020-04
-externa_b08_e15_675,t1_menos_12,la locación ya está en T1 2020-09
+anelo_b13_e11_693,t1_menos_24,"también se ve en T1 2020-05, con equipos: con -12 no alcanza, como la 717"
+anelo_b13_e3_676,t1_menos_24,"desmontada entre 2020-01 y 2020-02 (13 meses antes del pozo): con -24 el T1 queda en 2019-02, limpio"
+externa_b08_e12_779,preexistente,"desmontada entre 2019-01 y 2019-02, 3 años antes del pozo (2022-03); la nueva de al lado es la 772"
+externa_b08_e13_664,t1_menos_24,"desmontada entre 2019-04 y 2019-05 (17 meses antes del pozo): con -24 el T1 queda en 2019-01, limpio"
+externa_b08_e15_675,t1_menos_24,"desmontada entre 2019-08 y 2019-09 (19 meses antes del pozo): con -24 el T1 queda en 2019-03, limpio"
 anelo_b03_e14_717,t1_menos_24,desmontada entre 2019-06 y 2020-01 (16 meses antes del pozo): con -12 todavía se ve en T1
 anelo_b05_e1_791,preexistente,"desmontada entre 2019-01 y 2020-03, más de 2 años antes del pozo (2022-03): ni con -24 hay un antes limpio"
 anelo_b05_e3_821,t1_menos_12,revisión rápida (pares_bian)

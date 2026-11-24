@@ -117,6 +117,12 @@ for b in orden:
 loc["split"] = loc["bloque_anelo"].map(split_bloque)
 loc.loc[loc["en_zona_test_externo"], "split"] = "test_externo"
 
+# 4c. Correcciones de la validación de los pares (issue #15): se marcan, sin borrar filas, y
+# después de repartir los bloques, para que no cambien ni los splits ni los pares ya validados.
+from vmseg.correcciones_locaciones import leer_correcciones, marcar_correcciones
+
+loc = marcar_correcciones(loc, leer_correcciones(SALIDA + "correcciones_locaciones.csv"))
+
 # 5. Exportar
 cols_pozos = [
     "idpozo", "sigla", "locacion_id", "empresa", "area", "yacimiento", "provincia",
