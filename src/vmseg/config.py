@@ -37,6 +37,7 @@ class TrainingConfig:
         checkpoints_dir="runs/prueba",
         device="cpu",
         pesos_clases=None,
+        perdida="ce", # "ce", "ce_dice", "ce_lovasz" o "ce_dice_lovasz" (ver vmseg.perdidas)
     ):
         self.epochs = epochs
         self.learning_rate = learning_rate
@@ -44,6 +45,7 @@ class TrainingConfig:
         self.checkpoints_dir = checkpoints_dir
         self.device = device
         self.pesos_clases = pesos_clases
+        self.perdida = perdida
 
 
 def deterministic(seed=42):
