@@ -1,6 +1,6 @@
 # Elección de la pérdida (#20)
 
-Corrida del 2026-11-24 y 2026-11-25, siguiendo la devolución del profe: comparar la cross entropy con pesos que usábamos contra combinaciones de CE con Dice y Lovász (`src/vmseg/perdidas.py`, con `smp.losses`).
+Corrida del 2026-11-24 y 2026-11-25: comparar la cross entropy con pesos que usábamos contra combinaciones de CE con Dice y Lovász (`src/vmseg/perdidas.py`, con `smp.losses`).
 
 **Cómo se comparó.** Mismo modelo en los cuatro experimentos (modelo 1: siamesa, 6 bandas, fine-tuning) y validación cruzada por bloques: train + val (148 pares validados, 11 bloques de Añelo) repartidos en 5 folds de 28 a 31 pares, con cada bloque entero en un solo fold (`asignar_folds`). Cada fold se entrena con los otros cuatro: 50 épocas, AdamW con lr `1e-3`, `ReduceLROnPlateau` (factor 0,5, paciencia 5), batch 8, giros y rotaciones de 90°. Los dos test no se usan. Notebook: `notebooks/entrenar_kfold.ipynb`.
 
