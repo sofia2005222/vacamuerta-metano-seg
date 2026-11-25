@@ -1,0 +1,78 @@
+{
+  "nombre": "1_siamesa_6b_finetuning_ce_dice_lovasz",
+  "arquitectura": "siamesa",
+  "bandas": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "indices": false,
+  "modo": "finetuning",
+  "perdida": "ce_dice_lovasz",
+  "pesos_clases": null,
+  "epocas": 50,
+  "lr": 0.001,
+  "folds_corridos": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "iou_val_media": 0.7891,
+  "iou_val_desvio": 0.0333,
+  "iou_val_ult10_media": 0.7605,
+  "iou_val_ult10_desvio": 0.0394,
+  "mejores_epocas": [
+    44,
+    48,
+    50,
+    34,
+    49
+  ],
+  "por_fold": [
+    {
+      "fold": 0,
+      "pares_train": 117,
+      "pares_val": 31,
+      "iou_val": 0.762,
+      "mejor_epoca": 44,
+      "iou_val_ult10": 0.7551
+    },
+    {
+      "fold": 1,
+      "pares_train": 118,
+      "pares_val": 30,
+      "iou_val": 0.755,
+      "mejor_epoca": 48,
+      "iou_val_ult10": 0.7262
+    },
+    {
+      "fold": 2,
+      "pares_train": 118,
+      "pares_val": 30,
+      "iou_val": 0.8093,
+      "mejor_epoca": 50,
+      "iou_val_ult10": 0.7998
+    },
+    {
+      "fold": 3,
+      "pares_train": 119,
+      "pares_val": 29,
+      "iou_val": 0.7844,
+      "mejor_epoca": 34,
+      "iou_val_ult10": 0.7192
+    },
+    {
+      "fold": 4,
+      "pares_train": 120,
+      "pares_val": 28,
+      "iou_val": 0.8349,
+      "mejor_epoca": 49,
+      "iou_val_ult10": 0.8023
+    }
+  ]
+}
