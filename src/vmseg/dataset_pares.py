@@ -7,6 +7,7 @@ medio. Así el bucle de entrenamiento de entrenar.py sirve para los dos modelos.
 """
 import albumentations as A
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 
@@ -17,7 +18,7 @@ from vmseg.recorte import BANDAS, LOCACION, PILETA
 # posición de cada banda en el recorte
 B2, B4, B8, B11 = (BANDAS.index(b) for b in ("B2", "B4", "B8", "B11"))
 INDICES = ["NDVI", "NDBI", "BSI"]
-
+K_FOLDS = 5
 
 def calcular_indices(img):
     """
@@ -45,13 +46,14 @@ class ParesDataset(Dataset):
     Pares de un split, con la estructura del Dataset de segmentación del tutorial 11
     (is_train, build_transforms y apply_transforms).
     """
-    def __init__(self, config: DatasetConfig, split, is_train=False, mean=None, std=None):
+    def __init__(self, config: DatasetConfig, split=None, is_train=False, mean=None, std=None, ids=None):
         self.config = config
         self.split = split
         self.is_train = is_train
         self.mean = mean
         self.std = std
-        self.ids = self.find_files()
+        # con ids se usan esos pares (un fold del K-fold); si no, los validados del split
+        self.ids = list(ids) if ids is not None else self.find_files()
         self.transforms = self.build_transforms()
 
     def find_files(self):
@@ -139,6 +141,27 @@ def calcular_media_std_pares(dataset):
     std = (suma_cuad / N - mean ** 2).sqrt()
     return mean.float(), std.float()
 
+def asignar_folds(indice, k=K_FOLDS):
+    """
+    Fold (0 a k-1) de cada par validado de train y val, para la validación cruzada por bloques.
+
+    Todos los pares de un bloque van al mismo fold, así el modelo nunca se valida sobre un
+    terreno vecino al que vio al entrenar. Los bloques se reparten de mayor a menor, cada uno
+    al fold que tiene menos pares en ese momento, para que los folds queden parejos.
+    Devuelve una Series indexada por id.
+    """
+    pares = indice[indice["split"].isin(["train", "val"]) & indice["validada"]]
+    tamanos = pares.groupby(["zona", "bloque"]).size().sort_values(ascending=False, kind="stable")
+
+    pares_por_fold = [0] * k
+    fold_de_bloque = {}
+    for bloque, n in tamanos.items():
+        fold = pares_por_fold.index(min(pares_por_fold))
+        fold_de_bloque[bloque] = fold
+        pares_por_fold[fold] += n
+
+    folds = [fold_de_bloque[(z, b)] for z, b in zip(pares["zona"], pares["bloque"])]
+    return pd.Series(folds, index=pares["id"].values, name="fold")
 
 def get_data_pares(config: DatasetConfig):
     # la media y el desvío se calculan solo sobre train, sin aumento de datos
@@ -146,6 +169,34 @@ def get_data_pares(config: DatasetConfig):
 
     train_dataset = ParesDataset(config, "train", is_train=True, mean=mean, std=std)
     valid_dataset = ParesDataset(config, "val", mean=mean, std=std)
+
+    train_loader = DataLoader(
+                        train_dataset,
+                        batch_size=config.batch_size,
+                        shuffle=True,
+                        num_workers=config.num_workers
+                    )
+
+    valid_loader = DataLoader(
+                        valid_dataset,
+                        batch_size=config.batch_size,
+                        shuffle=False,
+                        num_workers=config.num_workers
+                    )
+
+    return train_loader, valid_loader, mean, std
+
+def get_data_pares_fold(config: DatasetConfig, fold, k=K_FOLDS):
+    """Loaders del K-fold por bloques: valida con el fold `fold` y entrena con los otros k-1."""
+    folds = asignar_folds(leer_indice_pares(config.data_root), k)
+    ids_train = folds.index[folds != fold]
+    ids_val = folds.index[folds == fold]
+
+    # la media y el desvío se calculan solo sobre los pares de entrenamiento de este fold
+    mean, std = calcular_media_std_pares(ParesDataset(config, ids=ids_train))
+
+    train_dataset = ParesDataset(config, is_train=True, mean=mean, std=std, ids=ids_train)
+    valid_dataset = ParesDataset(config, mean=mean, std=std, ids=ids_val)
 
     train_loader = DataLoader(
                         train_dataset,
