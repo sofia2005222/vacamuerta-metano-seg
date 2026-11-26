@@ -68,22 +68,53 @@ test\_externo, \% de locaciones detectadas a tiempo y mediana de la anticipació
 \section{Introducción y Marco Teórico}
 % Sofi (#23). Fuentes: docs/PROBLEMA.md, ADR-0002, docs/ESTADO_DEL_ARTE.md. Vocabulario de GLOSSARY.md.
 
-\pend{Párrafo de entrada: qué problema estudiamos, para qué sirve y cómo lo abordamos (en el TP2, el primer párrafo de la sección 1).}
+En el presente trabajo estudiamos la detección de locaciones petroleras nuevas en imágenes satelitales,
+un problema de detección de cambios con aplicaciones en inteligencia de mercado y en el monitoreo de la huella
+de la industria. Lo abordamos con el objetivo de anticipar la actividad de perforación en Vaca Muerta: entrenamos
+una red neuronal que segmenta, en pares de imágenes Sentinel-2 tomadas antes y después, la superficie desmontada
+para alojar pozos, y medimos con el padrón oficial de pozos cuántos meses antes del inicio de la perforación
+la detecta.
 
 \subsection{Problema y motivación}
-% Enfoque comercial (ADR-0002). Sourcewater va como motivación, no como bibliografía.
-\pend{Vaca Muerta y la actividad de perforación; quiénes usarían una alerta temprana (proveedores de servicios,
-analistas, reguladores); por qué el satélite: la locación se desmonta antes de que empiece la perforación.
-Ejemplo comercial: Sourcewater.}
+% Enfoque comercial (ADR-0002). Sourcewater va como motivación, no como bibliografía (nota al pie).
+Vaca Muerta es una formación geológica de la cuenca Neuquina de la que se extraen petróleo y gas no
+convencionales, y su actividad no deja de crecer: según el padrón de pozos de la Secretaría de Energía~\cite{padron},
+se pasó de unos 20 pozos perforados por mes en 2018--2019 a unos 36 en 2024--2025. Antes de perforar, la
+operadora desmonta un rectángulo de tierra, la \emph{locación}, que aloja varios pozos (en la zona de Añelo, la
+mediana es de cuatro). Como la locación se prepara semanas o meses antes de que llegue el equipo de perforación
+y es visible desde el espacio, detectarla temprano permite anticipar la actividad antes de que aparezca en los
+registros oficiales, que ubican cada pozo como un punto y con demora.
+
+Esa anticipación es inteligencia de mercado: cada empresa conoce su propia actividad, pero no la de la
+competencia. A las empresas de servicios (fractura, arena, agua) les permite prever la demanda y salir a buscar
+clientes, y a las operadoras, seguir lo que hacen sus vecinas; también les sirve a inversores, analistas y
+transportistas para anticipar la producción. En la cuenca Permian de Estados Unidos ya existen servicios
+comerciales que venden este tipo de alerta\footnote{Por ejemplo, \emph{DirtWork Alert}, de Sourcewater
+(\url{https://www.sourcewater.com}), que informa que las locaciones se desmontan típicamente entre 1 y 4 meses antes
+de la perforación. Son cifras de la empresa, sin revisión de pares, por lo que las usamos solo como motivación.}.
+El mismo modelo serviría además para el cumplimiento ambiental, por ejemplo para inventariar la huella de la
+actividad o verificar la restauración de locaciones abandonadas.
 
 \subsection{Objetivos e hipótesis}
 % docs/METODO.md, sección "Hipótesis y experimentos".
-\pend{Objetivo: segmentar locaciones nuevas entre dos fechas y medir con el padrón oficial cuántos meses de anticipación da el satélite.}
+El objetivo del trabajo es doble. Por un lado, segmentar en un par de imágenes satelitales las locaciones
+que aparecieron entre la primera fecha (T1) y la segunda (T2). Por otro, usar ese modelo sobre las imágenes
+mensuales de 2019 a 2023 para medir, con el padrón oficial como referencia, con cuántos meses de anticipación
+respecto del inicio de la perforación detecta cada locación nueva. Planteamos cuatro hipótesis, cada una con el
+experimento que la pone a prueba:
 \begin{itemize}[leftmargin=*,itemsep=1pt]
-  \item \textbf{H1 (bandas):} \pend{agregar NIR y SWIR a RGB mejora la detección frente a los cambios naturales de la estepa.}
-  \item \textbf{H2 (transfer learning):} \pend{fine-tuning $>$ encoder congelado $>$ desde cero, sobre todo con pocos datos.}
-  \item \textbf{H3 (generalización):} \pend{el desempeño cae en la zona externa (otras operadoras y otro paisaje).}
-  \item \textbf{H4 (arquitectura):} \pend{compartir el encoder entre fechas (siamesa) mejora respecto de apilarlas (fusión temprana).}
+  \item \textbf{H1 (bandas).} Agregar información infrarroja a RGB mejora la detección, porque ayuda a
+  distinguir el suelo desmontado de los cambios naturales de la estepa. Comparamos la red siamesa con tres
+  entradas: RGB, seis bandas (RGB, NIR y dos SWIR) y seis bandas más los índices NDVI, NDBI y BSI.
+  \item \textbf{H2 (transferencia de aprendizaje).} Con pocos datos, partir de un encoder preentrenado rinde
+  más que entrenar desde cero, y ajustarlo entero (\emph{fine-tuning}) más que congelarlo. Entrenamos la red
+  siamesa de seis bandas en los tres modos.
+  \item \textbf{H3 (generalización).} El desempeño cae en una zona con otras operadoras y otro paisaje.
+  Comparamos el modelo final en dos conjuntos de test: bloques de la misma zona de entrenamiento
+  (\texttt{test\_anelo}) y una zona externa que el modelo nunca vio (\texttt{test\_externo}).
+  \item \textbf{H4 (arquitectura).} Procesar cada fecha con el mismo encoder y comparar sus características
+  (red siamesa) funciona mejor que apilar las dos fechas en la entrada (fusión temprana). Comparamos las dos
+  arquitecturas con la misma entrada de seis bandas y en el modo \emph{fine-tuning}.
 \end{itemize}
 
 \subsection{Estado del arte}
