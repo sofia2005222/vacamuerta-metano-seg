@@ -8,10 +8,10 @@ from typing import Tuple
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from tqdm import tqdm
 
 from vmseg.config import TrainingConfig
+from vmseg.perdidas import PerdidaSegmentacion
 from vmseg.recorte import SIN_ETIQUETA
 
 # negrita para los números en la terminal
@@ -61,6 +61,8 @@ def train(
     status = f"Train:\t{bold}Epoch: {epoch_idx}/{total_epochs}{reset}"
     prog_bar = tqdm(train_loader, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
     prog_bar.set_description(status)
+    # la misma pérdida en train y en validación (ver vmseg.perdidas)
+    criterio = PerdidaSegmentacion(train_config.perdida, train_config.pesos_clases).to(train_config.device)
 
     for data, target in prog_bar:
 
@@ -73,8 +75,7 @@ def train(
         # paso hacia adelante: la salida es (B, num_classes, H, W)
         output = model(data)
 
-        # cross entropy por píxel, ignorando los píxeles sin etiqueta
-        loss = F.cross_entropy(output, target, ignore_index=SIN_ETIQUETA)
+        loss = criterio(output, target)
 
         # calculo los gradientes (backpropagation)
         loss.backward()
@@ -123,6 +124,8 @@ def validate(
     status = f"Valid:\t{bold}Epoch: {epoch_idx}/{total_epochs}{reset}"
     prog_bar = tqdm(valid_loader, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
     prog_bar.set_description(status)
+    # la misma pérdida en train y en validación (ver vmseg.perdidas)
+    criterio = PerdidaSegmentacion(train_config.perdida, train_config.pesos_clases).to(train_config.device)
 
     for data, target in prog_bar:
 
@@ -133,8 +136,7 @@ def validate(
         with torch.no_grad():
             output = model(data)
 
-        # cross entropy por píxel, ignorando los píxeles sin etiqueta
-        valid_loss = F.cross_entropy(output, target, ignore_index=SIN_ETIQUETA).item()
+        valid_loss = criterio(output, target).item()
 
         # clase predicha en cada píxel
         pred_idx = output.argmax(dim=1)
@@ -235,7 +237,7 @@ def main(
     return history
 
 def guardar_curvas(history, ruta):
-    """Guarda como imagen las curvas de entrenamiento: loss por iteración y, por época, loss y mIoU."""
+    """Guarda como imagen las curvas de entrenamiento: loss por iteración y, por época, loss e IoU de locación."""
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(1, 3, figsize=(18, 4))
@@ -252,7 +254,7 @@ def guardar_curvas(history, ruta):
 
     axes[2].plot(history["train_miou"], "-o", label="train")
     axes[2].plot(history["valid_miou"], "-o", label="val")
-    axes[2].set_title("mIoU (locación y pileta)")
+    axes[2].set_title("IoU de locación")
     axes[2].set_xlabel("Epoch")
     axes[2].legend()
 
