@@ -1,0 +1,303 @@
+% Informe final del TP de Visión Artificial (#27). Molde con la estructura del TP2.
+%
+% Cada sección dice quién la escribe (reparto del #27) y de dónde salen los datos.
+% Lo que falta completar está en rojo con \pend{...}: antes de entregar, buscar "\pend" y que no quede ninguno.
+% Las figuras van en informe/figuras/. Si falta el logo (figuras/logo_udesa.png), la portada sale sin él.
+%
+% Compilar: pdflatex informe.tex (dos veces, para las referencias cruzadas), o subir la carpeta a Overleaf.
+
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla,es-nodecimaldot]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2cm,columnsep=0.8cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{figuras/}}
+
+% Texto pendiente: se ve en rojo hasta que se complete.
+\newcommand{\pend}[1]{\textcolor{red}{[#1]}}
+% Figura pendiente: un recuadro con la descripción, del ancho de la columna.
+\newcommand{\figpend}[1]{\fbox{\parbox[c][3.5cm][c]{0.92\columnwidth}{\centering\small\textcolor{red}{#1}}}}
+
+\begin{document}
+
+% ------------------------------------------------------------------ portada
+
+\begin{titlepage}
+\centering
+\IfFileExists{figuras/logo_udesa.png}{\includegraphics[width=0.35\textwidth]{logo_udesa.png}\par}{}
+\vspace{1.5cm}
+{\LARGE\bfseries Trabajo Práctico Final:\\[0.2em] \pend{título distintivo}\par}
+\vspace{0.4cm}
+{\large Alerta temprana de actividad en Vaca Muerta con imágenes satelitales\par}
+\vspace{1cm}
+{\Large Visión Artificial\par}
+\vspace{1cm}
+Grupo 4: Sofía Bottino, Agustina Barrena, Bianca Paz\par
+\vspace{0.8cm}
+Información de contacto: sbottino@udesa.edu.ar, abarrena@udesa.edu.ar, bpaz@udesa.edu.ar\par
+\vspace{0.8cm}
+Segundo semestre 2026\par
+\vspace{1.5cm}
+
+\begin{flushleft}
+{\large\bfseries Resumen\par}
+\vspace{0.3cm}
+% Entre las tres, al final. Un párrafo como el del TP2: problema, datos, método y los números principales.
+\pend{Resumen (entre las tres, se escribe al final). Problema: detectar locaciones petroleras nuevas de Vaca Muerta
+en imágenes Sentinel-2 antes del inicio de perforación. Datos: N pares validados de dos zonas (Añelo y zona externa).
+Método: red siamesa con encoder ResNet34 y K-fold por bloques. Resultados: IoU de locación en test\_anelo y
+test\_externo, \% de locaciones detectadas a tiempo y mediana de la anticipación en meses.}
+\end{flushleft}
+\end{titlepage}
+
+\twocolumn
+
+% ------------------------------------------------------------------ 1
+
+\section{Introducción y Marco Teórico}
+% Sofi (#23). Fuentes: docs/PROBLEMA.md, ADR-0002, docs/ESTADO_DEL_ARTE.md. Vocabulario de GLOSSARY.md.
+
+\pend{Párrafo de entrada: qué problema estudiamos, para qué sirve y cómo lo abordamos (en el TP2, el primer párrafo de la sección 1).}
+
+\subsection{Problema y motivación}
+% Enfoque comercial (ADR-0002). Sourcewater va como motivación, no como bibliografía.
+\pend{Vaca Muerta y la actividad de perforación; quiénes usarían una alerta temprana (proveedores de servicios,
+analistas, reguladores); por qué el satélite: la locación se desmonta antes de que empiece la perforación.
+Ejemplo comercial: Sourcewater.}
+
+\subsection{Objetivos e hipótesis}
+% docs/METODO.md, sección "Hipótesis y experimentos".
+\pend{Objetivo: segmentar locaciones nuevas entre dos fechas y medir con el padrón oficial cuántos meses de anticipación da el satélite.}
+\begin{itemize}[leftmargin=*,itemsep=1pt]
+  \item \textbf{H1 (bandas):} \pend{agregar NIR y SWIR a RGB mejora la detección frente a los cambios naturales de la estepa.}
+  \item \textbf{H2 (transfer learning):} \pend{fine-tuning $>$ encoder congelado $>$ desde cero, sobre todo con pocos datos.}
+  \item \textbf{H3 (generalización):} \pend{el desempeño cae en la zona externa (otras operadoras y otro paisaje).}
+  \item \textbf{H4 (arquitectura):} \pend{compartir el encoder entre fechas (siamesa) mejora respecto de apilarlas (fusión temprana).}
+\end{itemize}
+
+\subsection{Estado del arte}
+% Con referato. Ramachandran et al. (2024) es la referencia metodológica principal.
+\pend{Ramachandran et al.~\cite{ramachandran2024}: locaciones y tanques en Permian y Denver-Julesburg, generalización a regiones nuevas.
+U-Net~\cite{ronneberger2015}. Sumar 1--2 papers con referato de segmentación o detección de cambios sobre Sentinel-2.
+Modelo de ESRI para el Permian como antecedente (sin acceso).}
+
+\subsection{Imágenes Sentinel-2}
+% Sofi. ADR-0004, docs/METODO.md "Bandas e índices".
+\pend{Resolución de 10 y 20~m, revisita de 5 días, bandas usadas (B2, B3, B4, B8, B11, B12) y por qué NIR y SWIR
+distinguen suelo desmontado de vegetación. Índices NDVI, NDBI y BSI con sus fórmulas.}
+\begin{equation}
+\mathrm{NDVI} = \frac{B8 - B4}{B8 + B4}
+\label{eq:ndvi}
+\end{equation}
+
+\subsection{Segmentación semántica y U-Net}
+% Agus (marco teórico del modelo).
+\pend{Segmentación semántica como clasificación por píxel; arquitectura encoder-decoder con skip connections; encoder ResNet34 preentrenado en ImageNet.}
+
+\subsection{Detección de cambios bitemporal}
+% Agus. ADR-0011.
+\pend{Dos fechas T1 y T2; fusión temprana (apilar canales) frente a red siamesa (encoder compartido y fusión de características por diferencia).}
+
+\subsection{Funciones de pérdida}
+% Agus. resultados/kfold/perdidas.md.
+\pend{Desbalance de clases (la locación es $\sim$0,3\,\% de los píxeles); entropía cruzada con pesos, Dice y Lovász.}
+
+% ------------------------------------------------------------------ 2
+
+\section{Metodología}
+
+\pend{Párrafo con el pipeline completo: imágenes mensuales $\rightarrow$ pares $\rightarrow$ etiquetado $\rightarrow$ modelo $\rightarrow$ evaluación $\rightarrow$ backtesting.}
+
+\begin{figure}[t]
+\centering
+\figpend{Figura: diagrama del pipeline}
+\caption{\pend{Pipeline del proyecto.}}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Zonas de estudio y padrón de pozos}
+% Sofi. docs/DATASET.md, ADR-0006, data/zonas_estudio.json.
+\pend{Padrón de pozos de la Secretaría de Energía (Capítulo IV, CC-BY-4.0); agrupación de pozos en locaciones a 60~m;
+locación nueva (primer pozo entre julio de 2019 y diciembre de 2023); Zona Añelo (4$\times$4 bloques) y zona externa;
+splits por bloque (train, val, test\_anelo, test\_externo) para evitar fuga espacial.}
+
+\begin{figure}[t]
+\centering
+\figpend{Figura: mapa de las dos zonas con los bloques coloreados por split y las locaciones nuevas}
+\caption{\pend{Zonas de estudio, bloques y splits.}}
+\label{fig:zonas}
+\end{figure}
+
+\subsection{Imágenes mensuales}
+% Sofi. ADR-0010, src/vmseg/gee.py y exportar.py.
+\pend{Google Earth Engine; mediana mensual de píxeles despejados con Cloud Score+; enero de 2019 a diciembre de 2023;
+meses nublados o con pocas observaciones despejadas.}
+
+\subsection{Pares y etiquetado}
+% Sofi. docs/METODO.md "Encuadres y pares", docs/VALIDACION.md.
+\pend{Encuadres de 256$\times$256~px; positivos con T1 = mes de perforación $-6$ y T2 = $+1$; negativos con T2 = T1 + 7;
+máscaras propuestas con SAM sobre T2 y caída de NDVI; revisión rápida y corrección en QGIS; correcciones de T1 a $-12$ o $-24$
+meses y locaciones preexistentes; positivos de otras formaciones en train y val.}
+
+\subsection{Modelos}
+% Agus. src/vmseg/siamesa.py, docs/METODO.md (tabla de los 6 modelos).
+\pend{Siamesa y fusión temprana con U-Net de smp; entradas RGB, 6 bandas y 6 bandas + índices; modos desde cero,
+congelado y fine-tuning; adaptación de la primera capa para más de 3 canales. Solo la clase locación (num\_classes = 2).}
+
+\begin{table}[t]
+\centering
+\caption{\pend{Los seis modelos entrenados.}}
+\label{tab:modelos}
+\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+\# & Arquitectura & Entrada & Modo \\
+\midrule
+1 & Siamesa & 6 bandas & Fine-tuning \\
+2 & Fusión temprana & 6 + 6 bandas & Fine-tuning \\
+3 & Siamesa & RGB & Fine-tuning \\
+4 & Siamesa & 6 bandas + índices & Fine-tuning \\
+5 & Siamesa & 6 bandas & Desde cero \\
+6 & Siamesa & 6 bandas & Congelado \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Entrenamiento}
+% Agus. src/vmseg/entrenar.py, kfold.py, notebooks/entrenar_kfold.ipynb. Devolución del profe (#27).
+\pend{K-fold por bloques (5 folds sobre train + val); AdamW, lr, ReduceLROnPlateau, batch, épocas; aumento de datos
+(giros y rotaciones de 90°, iguales para T1, T2 y la máscara, sin cambios de brillo ni color); estandarización por canal sobre train;
+entrenamiento final con todos los pares y la mediana de las mejores épocas.}
+
+\subsection{Evaluación}
+% Bian. src/vmseg/metricas.py.
+\pend{Métricas por píxel (IoU de locación, precisión, recall, matriz de confusión) y por objeto; evaluación en test\_anelo y test\_externo.}
+
+\subsection{Backtesting}
+% Bian. ADR-0003, ADR-0007, GLOSSARY.md.
+\pend{Pares ($m-6$, $m$) sobre las imágenes mensuales; locación capturada (centro dentro de un objeto predicho, con 50~m de margen);
+primera detección (dos meses seguidos); anticipación respecto del inicio de perforación; locación detectada a tiempo.}
+\begin{equation}
+\text{anticipación} = \text{mes de inicio de perforación} - \text{mes de primera detección}
+\label{eq:anticipacion}
+\end{equation}
+
+% ------------------------------------------------------------------ 3
+
+\section{Resultados y Discusión}
+
+\subsection{Dataset}
+% Sofi. data/indice_pares.csv, data/correcciones_pares.csv. Acuerdo: Bian (#19).
+\pend{Pares por split (tabla); correcciones de la validación (cuántos a $-12$, $-24$ y preexistentes); acuerdo entre etiquetadoras (IoU, #19).}
+
+\begin{table}[t]
+\centering
+\caption{\pend{Pares validados por split.}}
+\label{tab:dataset}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Split & Positivos & Negativos & Total \\
+\midrule
+train & \pend{75} & \pend{54} & \pend{129} \\
+val & \pend{16} & \pend{14} & \pend{30} \\
+test\_anelo & \pend{28} & \pend{24} & \pend{52} \\
+test\_externo & \pend{45} & \pend{38} & \pend{83} \\
+\midrule
+Total & \pend{164} & \pend{130} & \pend{294} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\figpend{Figura: ejemplos de pares (T1, T2, máscara) con y sin locación}
+\caption{\pend{Ejemplos del dataset.}}
+\label{fig:ejemplos_dataset}
+\end{figure}
+
+\subsection{Elección de la pérdida}
+% Agus. resultados/kfold/perdidas.md.
+\pend{Tabla de las cuatro pérdidas con IoU de val (media $\pm$ desvío de los 5 folds) y la elegida.}
+
+\subsection{Comparación de modelos (H1, H2 y H4)}
+% Agus (#20). Curvas de entrenamiento: loss por iteración y métrica en train y val por época (lo pide la consigna).
+\pend{Tabla de los 6 modelos con IoU de locación (media $\pm$ desvío); discusión de cada hipótesis; curvas del mejor modelo.}
+
+\begin{figure}[t]
+\centering
+\figpend{Figura: curvas de entrenamiento del mejor modelo}
+\caption{\pend{Curvas de entrenamiento.}}
+\label{fig:curvas}
+\end{figure}
+
+\subsection{Evaluación en test (H3)}
+% Bian (#21).
+\pend{Métricas en test\_anelo y test\_externo; matrices de confusión; ejemplos correctos e incorrectos; caída entre zonas.}
+
+\subsection{Análisis de errores y casos patológicos}
+% Agus (#25).
+\pend{Falsos positivos (cambios naturales, caminos, otras obras) y falsos negativos (locaciones chicas, meses nublados); hipótesis sobre el comportamiento del modelo.}
+
+\subsection{Backtesting}
+% Bian (#26). El número estrella del TP.
+\pend{Por zona: \% de locaciones detectadas a tiempo, tarde y nunca; histograma y mediana de la anticipación; comparación entre zonas.}
+
+\begin{figure}[t]
+\centering
+\figpend{Figura: histograma de la anticipación por zona}
+\caption{\pend{Distribución de la anticipación.}}
+\label{fig:anticipacion}
+\end{figure}
+
+\subsection{Detecciones sin registro}
+% Sofi (#22). Se recorta si falta tiempo.
+\pend{Muestra de 20 detecciones sin registro clasificadas a ojo: locación sin registrar, otra infraestructura, cambio natural o error.}
+
+% ------------------------------------------------------------------ 4
+
+\section{Conclusiones y trabajo futuro}
+% Entre las tres. Trabajo futuro según el #27 y la devolución del profe.
+\pend{Conclusiones por hipótesis y la respuesta a la pregunta principal (cuántos meses de anticipación da el satélite).
+Trabajo futuro: pérdida robusta al ruido de etiquetas, otras cuencas (Alberta), comparación con ESRI,
+encoders preentrenados en imágenes satelitales o con DINOv3.}
+
+% ------------------------------------------------------------------ referencias
+
+\begin{thebibliography}{9}
+
+\bibitem{ramachandran2024}
+N.~Ramachandran \emph{et al.}, ``Deep learning for detecting and characterizing oil and gas well pads in satellite imagery,''
+\emph{Nature Communications}, vol.~15, 2024. doi: 10.1038/s41467-024-50334-9.
+
+\bibitem{ronneberger2015}
+O.~Ronneberger, P.~Fischer y T.~Brox, ``U-Net: Convolutional Networks for Biomedical Image Segmentation,''
+en \emph{MICCAI}, 2015.
+
+\bibitem{padron}
+Secretaría de Energía de la Nación, ``Producción de petróleo y gas por pozo (Capítulo IV),'' datos.gob.ar, licencia CC-BY-4.0.
+\pend{fecha de consulta}
+
+\bibitem{osm}
+\pend{OpenStreetMap: qué se usó y cita (© colaboradores de OpenStreetMap, ODbL).}
+
+\bibitem{sentinel}
+\pend{Copernicus Sentinel-2 y Cloud Score+ (Google Earth Engine).}
+
+\bibitem{sam}
+\pend{A.~Kirillov \emph{et al.}, ``Segment Anything,'' ICCV, 2023 (verificar).}
+
+\end{thebibliography}
+
+\end{document}
