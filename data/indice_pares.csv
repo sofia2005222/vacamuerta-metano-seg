@@ -44,7 +44,7 @@ anelo_b03_e5_736,anelo_b03_e5,736,anelo,3,test_anelo,2021-03,2021-10,537730,5753
 anelo_b03_e5_neg,anelo_b03_e5,-1,anelo,3,test_anelo,2022-05,2022-12,537730,5753880,EPSG:32719,False,,agus
 anelo_b03_e8_769,anelo_b03_e8,769,anelo,3,test_anelo,2021-02,2021-09,536050,5751970,EPSG:32719,False,,agus
 anelo_b03_e9_neg,anelo_b03_e9,-1,anelo,3,test_anelo,2020-02,2020-09,537730,5751970,EPSG:32719,False,,agus
-anelo_b04_e1_164794,anelo_b04_e1,164794,anelo,4,train,2021-08,2022-09,514820,5764200,EPSG:32719,False,T1 corrido a −12 meses: la locación ya se veía; revisión rápida (pares_otras_sofi),sofi
+anelo_b04_e1_164794,anelo_b04_e1,164794,anelo,4,train,2020-08,2022-09,514820,5764200,EPSG:32719,False,T1 corrido a −24 meses: la locación ya se veía; con -12 todavía se ve (pares_otras_sofi),sofi
 anelo_b04_e11_923,anelo_b04_e11,923,anelo,4,train,2022-10,2023-05,518190,5760370,EPSG:32719,False,,agus
 anelo_b04_e12_neg,anelo_b04_e12,-1,anelo,4,train,2019-05,2019-12,513130,5758460,EPSG:32719,False,,agus
 anelo_b04_e13_neg,anelo_b04_e13,-1,anelo,4,train,2021-03,2021-10,514820,5758460,EPSG:32719,False,,agus
