@@ -24,10 +24,9 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
-from sklearn.cluster import DBSCAN
 
 from vmseg import gee
-from vmseg.armar_pares import RUTA_INDICE_PARES, RUTA_LOCACIONES, RUTA_POZOS_TODOS
+from vmseg.armar_pares import RUTA_INDICE_PARES, RUTA_LOCACIONES, RUTA_POZOS_TODOS, locaciones_otras_formaciones
 from vmseg.mascaras_propuestas import leer_contexto
 from vmseg.par import COLUMNAS_INDICE_PARES, guardar_tif, leer_indice_pares
 from vmseg.recorte import CRS, RESOLUCION, SIN_ETIQUETA, TAMANO
@@ -38,8 +37,6 @@ PAQUETES = "paquetes"  # subcarpeta con <persona>.zip
 PREFIJO = "pares"  # carpeta en el bucket
 PROYECTO_BUCKET = "tp-final-cv-514618"
 CHECKPOINT_SAM = os.path.join(os.path.expanduser("~"), ".cache", "sam", "sam_vit_h_4b8939.pth")
-DIST_LOCACION_M = 60  # igual que en data/armar_dataset.py
-CERCA_DE_VM_M = 100  # un pozo de otra formación a menos de esto de una locación del padrón es de esa locación
 SUFIJOS_PAQUETE = ["_t1.tif", "_t2.tif", "_mask.tif", "_dndvi.tif", "_propuesta.gpkg"]
 
 
@@ -143,23 +140,9 @@ def padron_para_clic(locaciones, pozos):
     pozos: DataFrame de data/pozos_todos.csv.
     """
     vm = locaciones[["locacion_id", "fecha_primer_pozo", "geometry"]].assign(nota="")
-    otros = pozos[~pozos["vaca_muerta"] & pozos["fecha_inicio_perforacion"].notna()].copy()
-    if otros.empty:
+    g = locaciones_otras_formaciones(locaciones, pozos)
+    if g.empty:
         return vm
-    rad = np.radians(otros[["lat", "lon"]].values)
-    otros["grupo"] = DBSCAN(eps=DIST_LOCACION_M / 6_371_000, min_samples=1,
-                            metric="haversine", algorithm="ball_tree").fit_predict(rad)
-    unir = lambda s: ", ".join(sorted(s.dropna().astype(str).unique()))
-    g = otros.groupby("grupo").agg(lon=("lon", "mean"), lat=("lat", "mean"),
-                                   fecha_primer_pozo=("fecha_inicio_perforacion", "min"),
-                                   formacion=("formacion", unir), sigla=("sigla", unir))
-    g = gpd.GeoDataFrame(g, geometry=gpd.points_from_xy(g["lon"], g["lat"]), crs="EPSG:4326")
-
-    # Los que caen sobre una locación de Vaca Muerta ya tienen su clic.
-    vm_m, g_m = vm.to_crs(CRS), g.to_crs(CRS)
-    cerca = gpd.sjoin_nearest(g_m, vm_m[["geometry"]], max_distance=CERCA_DE_VM_M, how="left")
-    lejos = cerca[cerca["index_right"].isna()].index.unique()
-    g = g.loc[lejos]
     g = gpd.GeoDataFrame(dict(
         locacion_id=-1, fecha_primer_pozo=g["fecha_primer_pozo"].values,
         nota=[f"pozo de otra formación ({f}, {s}), no está en el padrón de locaciones"

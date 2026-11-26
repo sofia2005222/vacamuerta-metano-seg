@@ -5,6 +5,13 @@ Positivos: un par por cada locación nueva (primer pozo entre julio de 2019 y
 diciembre de 2023), en el encuadre que la contiene, con T1 = mes del inicio de
 perforación − 6 y T2 = mes del inicio de perforación + 1.
 
+También son positivos las locaciones nuevas de otras formaciones (pozos de
+data/pozos_todos.csv a más de CERCA_DE_VM_M de toda locación de Vaca Muerta,
+agrupados a DIST_LOCACION_M), pero solo en los bloques de train y val de la Zona
+Añelo: el backtesting sigue siendo solo sobre Vaca Muerta. Su locacion_id es el
+idpozo de su primer pozo (los de Vaca Muerta no pasan de ~1.200, los idpozo
+empiezan en ~8.000).
+
 Negativos: pares en que no aparece ninguna locación entre T1 y T2, con T2 = T1 + 7
 meses (como los positivos, y así caen siempre en estaciones distintas). Se usan
 todos los pozos del padrón (data/pozos_todos.csv), no solo los de Vaca Muerta.
@@ -19,9 +26,10 @@ import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from sklearn.cluster import DBSCAN
 
 from vmseg import gee
-from vmseg.encuadres import encuadres
+from vmseg.encuadres import bloque_de, encuadres, split_de_bloque
 from vmseg.exportar import FIN, INICIO
 from vmseg.indice import RUTA_INDICE
 from vmseg.par import COLUMNAS_INDICE_PARES
@@ -37,6 +45,13 @@ RUTA_POZOS_TODOS = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "pozos_todos.cs
 RUTA_INDICE_PARES = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "indice_pares.csv")
 RUTA_CORRECCIONES = os.path.join(os.path.dirname(gee.RUTA_ZONAS), "correcciones_pares.csv")
 ZONAS = ["anelo", "externa"]
+
+DIST_LOCACION_M = 60  # igual que en data/armar_dataset.py
+CERCA_DE_VM_M = 100  # un pozo de otra formación a menos de esto de una locación del padrón es de esa locación
+SPLITS_OTRAS_FORMACIONES = {"train", "val"}
+# Los positivos de otras formaciones los valida una sola persona, sin importar el bloque, junto
+# con su parte del acuerdo entre etiquetadoras (#19).
+RESPONSABLE_OTRAS_FORMACIONES = "sofi"
 
 SEPARACION_NEGATIVOS = 7  # meses entre T1 y T2, igual que en los positivos
 APARECE_ANTES = 6  # meses antes del inicio de perforación en que ya se puede ver la locación
@@ -62,6 +77,51 @@ def locaciones_nuevas(zona, ruta=RUTA_LOCACIONES):
     loc = loc[loc[COLUMNA_ZONA[zona]] & fecha.between(DESDE_NUEVAS, HASTA_NUEVAS)].copy()
     loc["x"], loc["y"] = loc.geometry.x, loc.geometry.y
     return pd.DataFrame(loc.drop(columns="geometry"))
+
+
+def locaciones_otras_formaciones(locaciones, pozos):
+    """
+    Locaciones de pozos de otras formaciones que no son de ninguna locación de Vaca Muerta:
+    pozos con fecha agrupados a DIST_LOCACION_M (como en armar_dataset.py), sin los grupos a
+    menos de CERCA_DE_VM_M de una locación del padrón (de cualquier fecha).
+
+    locaciones: GeoDataFrame de data/locaciones_vaca_muerta.geojson.
+    pozos: DataFrame de data/pozos_todos.csv.
+    Devuelve un GeoDataFrame (EPSG:4326) con locacion_id (idpozo del primer pozo),
+    fecha_primer_pozo, formacion y sigla.
+    """
+    columnas = ["locacion_id", "fecha_primer_pozo", "formacion", "sigla", "geometry"]
+    otros = pozos[~pozos["vaca_muerta"] & pozos["fecha_inicio_perforacion"].notna()].copy()
+    if otros.empty:
+        return gpd.GeoDataFrame(columns=columnas, geometry="geometry", crs="EPSG:4326")
+    rad = np.radians(otros[["lat", "lon"]].values)
+    otros["grupo"] = DBSCAN(eps=DIST_LOCACION_M / 6_371_000, min_samples=1,
+                            metric="haversine", algorithm="ball_tree").fit_predict(rad)
+    unir = lambda s: ", ".join(sorted(s.dropna().astype(str).unique()))
+    primero = otros.sort_values(["fecha_inicio_perforacion", "idpozo"]).groupby("grupo")["idpozo"].first()
+    g = otros.groupby("grupo").agg(lon=("lon", "mean"), lat=("lat", "mean"),
+                                   fecha_primer_pozo=("fecha_inicio_perforacion", "min"),
+                                   formacion=("formacion", unir), sigla=("sigla", unir))
+    g["locacion_id"] = primero
+    g = gpd.GeoDataFrame(g, geometry=gpd.points_from_xy(g["lon"], g["lat"]), crs="EPSG:4326")
+
+    # Los que caen sobre una locación de Vaca Muerta son de esa locación.
+    cerca = gpd.sjoin_nearest(g.to_crs(CRS), locaciones[["geometry"]].to_crs(CRS),
+                              max_distance=CERCA_DE_VM_M, how="left")
+    lejos = cerca[cerca["index_right"].isna()].index.unique()
+    return g.loc[lejos, columnas].reset_index(drop=True)
+
+
+def locaciones_nuevas_otras_formaciones(zona, ruta_locaciones=RUTA_LOCACIONES, ruta_pozos=RUTA_POZOS_TODOS):
+    """Locaciones nuevas de otras formaciones en los bloques de SPLITS_OTRAS_FORMACIONES de la zona, con x, y."""
+    pozos = pd.read_csv(ruta_pozos)
+    otras = locaciones_otras_formaciones(gpd.read_file(ruta_locaciones), pozos[pozos["zona"] == zona])
+    fecha = pd.to_datetime(otras["fecha_primer_pozo"])
+    otras = otras[fecha.between(DESDE_NUEVAS, HASTA_NUEVAS)]
+    bloques = bloque_de(zona, otras.geometry.x.values, otras.geometry.y.values)
+    otras = otras[[split_de_bloque(zona, int(b)) in SPLITS_OTRAS_FORMACIONES for b in bloques]].to_crs(CRS)
+    otras["x"], otras["y"] = otras.geometry.x, otras.geometry.y
+    return pd.DataFrame(otras.drop(columns="geometry"))
 
 
 def meses_par(fecha_perforacion):
@@ -250,7 +310,14 @@ def armar_indice(semilla=SEMILLA, ruta_correcciones=RUTA_CORRECCIONES):
     encuadres_z = {z: encuadres(z) for z in ZONAS}
     invalidos = {z: meses_invalidos(z) for z in ZONAS}
     positivos = pd.concat([pares_positivos(locaciones_nuevas(z), encuadres_z[z]) for z in ZONAS])
+    # Los negativos se reparten con los positivos de Vaca Muerta solamente, para que no cambien.
     cantidades = cantidades_por_split(positivos)
+    # Las de otras formaciones van después, así un par que ya existe no cambia de locación.
+    otras = {z: locaciones_nuevas_otras_formaciones(z) for z in ZONAS}
+    positivos = pd.concat([
+        pares_positivos(pd.concat([locaciones_nuevas(z), otras[z]], ignore_index=True), encuadres_z[z])
+        for z in ZONAS
+    ])
     negativos = [
         pares_negativos(encuadres_z[z], pozos_todos(z), invalidos[z],
                         {s: n for s, n in cantidades.items() if s in set(encuadres_z[z]["split"])}, semilla)
@@ -259,6 +326,8 @@ def armar_indice(semilla=SEMILLA, ruta_correcciones=RUTA_CORRECCIONES):
     indice = anotar_meses_dudosos(pd.concat([positivos, *negativos], ignore_index=True), invalidos)
     responsable = {(z, b): p for z, personas in REPARTO.items() for p, bloques in personas.items() for b in bloques}
     indice["responsable"] = [responsable[(z, b)] for z, b in zip(indice["zona"], indice["bloque"])]
+    ids_otras = set(pd.concat([o["locacion_id"] for o in otras.values()]))
+    indice.loc[indice["locacion_id"].isin(ids_otras), "responsable"] = RESPONSABLE_OTRAS_FORMACIONES
     if os.path.exists(ruta_correcciones):
         indice = aplicar_correcciones(indice, pd.read_csv(ruta_correcciones, dtype=str).fillna(""))
     return indice.sort_values(["zona", "bloque", "encuadre", "mes_t1"], ignore_index=True)

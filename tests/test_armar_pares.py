@@ -138,24 +138,27 @@ def test_anotar_meses_dudosos_agrega_a_la_nota_que_ya_habia():
 
 def test_indice_real():
     idx = armar_indice(ruta_correcciones="")  # sin correcciones de la validación
-    assert len(idx) == 298 and idx["id"].is_unique
-    assert (idx["locacion_id"] >= 0).sum() == 168 and (idx["locacion_id"] == -1).sum() == 130
+    assert len(idx) == 310 and idx["id"].is_unique
+    assert (idx["locacion_id"] >= 0).sum() == 180 and (idx["locacion_id"] == -1).sum() == 130
     assert idx.groupby("encuadre")["locacion_id"].apply(lambda s: (s == -1).sum()).max() == 1
     # con las correcciones solo salen los preexistentes
     from vmseg.armar_pares import RUTA_CORRECCIONES
     preexistentes = (pd.read_csv(RUTA_CORRECCIONES)["accion"] == "preexistente").sum()
-    assert len(armar_indice()) == 298 - preexistentes
+    assert len(armar_indice()) == 310 - preexistentes
 
 
 def test_reparto_cubre_todos_los_bloques_una_vez_y_queda_parejo():
-    from vmseg.armar_pares import REPARTO
+    from vmseg.armar_pares import REPARTO, RESPONSABLE_OTRAS_FORMACIONES
     from vmseg.encuadres import bloques
     for zona, personas in REPARTO.items():
         asignados = sorted(b for bs in personas.values() for b in bs)
         assert asignados == sorted(bloques(zona))
     idx = armar_indice(ruta_correcciones="")  # el reparto, antes de sacar los preexistentes
     assert idx["responsable"].notna().all()
-    por_persona = idx["responsable"].value_counts()
+    # Los de otras formaciones no entran en el reparto por bloques: los valida una sola persona.
+    otras = idx["locacion_id"] > 2000
+    assert (idx.loc[otras, "responsable"] == RESPONSABLE_OTRAS_FORMACIONES).all() and otras.sum() == 12
+    por_persona = idx.loc[~otras, "responsable"].value_counts()
     assert por_persona.max() - por_persona.min() <= 3
     assert (idx.groupby("responsable")["split"].nunique() >= 3).all()
 
@@ -196,3 +199,30 @@ def test_aplicar_correcciones_rechaza_accion_desconocida():
     idx = pd.DataFrame(dict(id=["a"], mes_t1=["2020-09"], mes_t2=["2021-04"], nota=[""]))
     with pytest.raises(ValueError):
         aplicar_correcciones(idx, pd.DataFrame(dict(id=["a"], accion=["borrar"], nota=[""])))
+
+
+def test_locaciones_otras_formaciones_lejos_de_vaca_muerta_con_id_del_primer_pozo():
+    import geopandas as gpd
+    from shapely.geometry import Point
+
+    from vmseg.armar_pares import locaciones_otras_formaciones
+
+    locs = gpd.GeoDataFrame(dict(locacion_id=[7]), geometry=[Point(-68.7, -38.3)], crs="EPSG:4326")
+    pozos = pd.DataFrame(dict(
+        idpozo=[9001, 9002, 9003, 9004, 9005],
+        lon=[-68.7, -68.65, -68.6502, -68.6, -68.55], lat=[-38.3] * 5,
+        fecha_inicio_perforacion=["2021-01-05", "2021-03-01", "2021-02-01", None, "2020-05-05"],
+        vaca_muerta=[False, False, False, False, True],
+        formacion=["lotena", "centenario", "centenario", "rayoso", "vaca muerta"], sigla=list("ABCDE"),
+    ))
+    o = locaciones_otras_formaciones(locs, pozos)
+    # 9001 es de la locación 7, 9004 no tiene fecha, 9005 es de Vaca Muerta; 9002 y 9003 son una locación.
+    assert list(o["locacion_id"]) == [9003] and o["fecha_primer_pozo"].iloc[0] == "2021-02-01"
+
+
+def test_otras_formaciones_solo_en_train_y_val():
+    from vmseg.armar_pares import locaciones_nuevas_otras_formaciones
+
+    o = locaciones_nuevas_otras_formaciones("anelo")
+    assert len(o) == 13 and (o["locacion_id"] > 2000).all()
+    assert locaciones_nuevas_otras_formaciones("externa").empty
