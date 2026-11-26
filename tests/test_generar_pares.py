@@ -71,6 +71,7 @@ def test_padron_para_clic_suma_pozos_de_otras_formaciones_lejos_de_vaca_muerta()
         fecha_inicio_perforacion=["2021-01-05", "2021-02-01", "2021-03-01", None],
         vaca_muerta=[False, False, False, False],
         formacion=["lotena", "centenario", "centenario", "rayoso"], sigla=["A", "B", "C", "D"],
+        idpozo=[9001, 9002, 9003, 9004],
     ))
     p = padron_para_clic(locs, pozos)
     # A cae sobre la locación 7; B y C (a 17 m) son una sola locación nueva; D no tiene fecha.
