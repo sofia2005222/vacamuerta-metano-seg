@@ -1,7 +1,8 @@
 from vmseg.config import DatasetConfig, TrainingConfig
-from vmseg.kfold import entrenar_kfold, media_desvio, resumir
+from vmseg.kfold import entrenar_final, entrenar_kfold, media_desvio, resumir
 from vmseg.par import generar_pares_falsos
-
+from vmseg.dataset_pares import asignar_folds
+from vmseg.par import generar_pares_falsos, leer_indice_pares
 
 def test_resumir_toma_el_mejor_y_las_ultimas_10():
     history = {"valid_miou": [0.1] * 10 + [0.5, 0.9] + [0.3] * 10}
@@ -29,3 +30,19 @@ def test_kfold_entrena_cada_fold(tmp_path):
         assert (tmp_path / "runs" / f"fold{fold}" / "curvas.png").exists()
     # train_config no se modifica
     assert train_config.checkpoints_dir == str(tmp_path / "runs")
+
+def test_entrenar_final_usa_todos_los_pares_y_guarda_final(tmp_path):
+    generar_pares_falsos(tmp_path / "pares", n=12, tamano=64)
+    dataset_config = DatasetConfig(data_root=str(tmp_path / "pares"), num_classes=2,
+                                   batch_size=2, num_workers=0)
+    train_config = TrainingConfig(epochs=1, checkpoints_dir=str(tmp_path / "final"), perdida="ce_dice")
+
+    history, mean, std = entrenar_final(dataset_config, train_config, "siamesa", "cero")
+
+    # entrena con todos los pares de train y val, sin validar
+    assert history["pares_train"] == len(asignar_folds(leer_indice_pares(str(tmp_path / "pares"))))
+    assert history["valid_miou"] == []
+    assert (tmp_path / "final" / "final.pt").exists()
+    assert (tmp_path / "final" / "curvas.png").exists()
+    assert not (tmp_path / "final" / "best.pt").exists()
+    assert len(mean) == len(std) == 6

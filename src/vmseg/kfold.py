@@ -11,7 +11,7 @@ import numpy as np
 import torch
 
 from vmseg.config import deterministic
-from vmseg.dataset_pares import K_FOLDS, get_data_pares_fold
+from vmseg.dataset_pares import K_FOLDS, get_data_pares_final, get_data_pares_fold
 from vmseg.entrenar import guardar_curvas, main
 from vmseg.siamesa import crear_modelo, nombres_canales
 
@@ -74,6 +74,30 @@ def entrenar_kfold(dataset_config, train_config, arquitectura, modo, k=K_FOLDS, 
             al_terminar_fold(fold, resumen)
     return resultados
 
+def entrenar_final(dataset_config, train_config, arquitectura, modo, semilla=42):
+    """
+    Modelo final: entrena con todos los pares del K-fold, sin validación, durante
+    `train_config.epochs` épocas (la mediana de las mejores épocas de los folds).
+    Deja `final.pt` y `curvas.png` en `train_config.checkpoints_dir`.
+    Devuelve la historia y la media y el desvío con que se normalizó (hacen falta para evaluar).
+    """
+    deterministic(semilla)
+    train_loader, mean, std = get_data_pares_final(dataset_config)
+
+    canales = nombres_canales(dataset_config)
+    model = crear_modelo(arquitectura, canales, num_classes=dataset_config.num_classes,
+                         modo=modo).to(train_config.device)
+
+    optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],
+                                  lr=train_config.learning_rate, weight_decay=train_config.weight_decay)
+    # sin validación, el learning rate baja cuando se estanca la loss de train
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=5)
+
+    history = main(model, optimizer, train_loader, None, train_config,
+                   num_classes=dataset_config.num_classes, scheduler=scheduler)
+    guardar_curvas(history, os.path.join(train_config.checkpoints_dir, "curvas.png"))
+    history["pares_train"] = len(train_loader.dataset)
+    return history, mean, std
 
 def media_desvio(resultados, clave):
     """Media y desvío (muestral) de una métrica entre los folds."""

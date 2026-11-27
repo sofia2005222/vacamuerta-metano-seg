@@ -186,31 +186,31 @@ def main(
 
         train_loss, train_miou, iter_losses = train(train_config, model, optimizer, train_loader,
                                                     epoch + 1, train_config.epochs, num_classes)
-
-        val_loss, val_miou = validate(train_config, model, valid_loader,
-                                      epoch + 1, train_config.epochs, num_classes)
-
         print(f"\n{bold}Train Loss: {train_loss:.4f}{reset}   {bold}Train mIoU: {train_miou:.4f}{reset}")
-        print(f"{bold}Val Loss:   {val_loss:.4f}{reset}   {bold}Val mIoU:   {val_miou:.4f}{reset}")
-
         iter_train_loss += iter_losses
         epoch_train_loss.append(train_loss)
         epoch_train_miou.append(train_miou)
-        epoch_valid_loss.append(val_loss)
-        epoch_valid_miou.append(val_miou)
 
-        # si hay scheduler, baja el learning rate cuando la loss de validación se estanca
+        # el modelo final se entrena sin validación (valid_loader=None)
+        if valid_loader is not None:
+            val_loss, val_miou = validate(train_config, model, valid_loader,
+                                          epoch + 1, train_config.epochs, num_classes)
+            print(f"{bold}Val Loss:   {val_loss:.4f}{reset}   {bold}Val mIoU:   {val_miou:.4f}{reset}")
+            epoch_valid_loss.append(val_loss)
+            epoch_valid_miou.append(val_miou)
+
+        # si hay scheduler, baja el learning rate cuando la loss se estanca
+        # (la de validación; sin validación, la de train)
         if scheduler is not None:
             old_lr = optimizer.param_groups[0]['lr']
-            scheduler.step(val_loss)
+            scheduler.step(val_loss if valid_loader is not None else train_loss)
             new_lr = optimizer.param_groups[0]['lr']
             if new_lr < old_lr:
                 print(f"lr {old_lr:.6f} -> {new_lr:.6f}")
 
         # guardo el mejor modelo según el mIoU de validación
-        score = val_miou
-        if score > best_score:
-            best_score = score
+        if valid_loader is not None and val_miou > best_score:
+            best_score = val_miou
             print(f"\nModel Improved... Saving Model ... ", end="")
             best_weights = copy.deepcopy(model.state_dict())
             torch.save(model.state_dict(), os.path.join(ckpt_dir, "best.pt"))
@@ -220,8 +220,12 @@ def main(
 
     print(f"Total time: {(time.time() - t_begin):.2f}s, Best Score: {best_score:.3f}")
 
-    # cargo los pesos del mejor modelo
-    model.load_state_dict(best_weights)
+    if valid_loader is None:
+        # sin validación no hay "mejor época": me quedo con los pesos de la última
+        torch.save(model.state_dict(), os.path.join(ckpt_dir, "final.pt"))
+    else:
+        # cargo los pesos del mejor modelo
+        model.load_state_dict(best_weights)
 
     history = dict(
         model=model,

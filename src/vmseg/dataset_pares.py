@@ -213,3 +213,19 @@ def get_data_pares_fold(config: DatasetConfig, fold, k=K_FOLDS):
                     )
 
     return train_loader, valid_loader, mean, std
+
+def get_data_pares_final(config: DatasetConfig):
+    """Loader del modelo final: entrena con todos los pares del K-fold (train + val), sin validación."""
+    ids = asignar_folds(leer_indice_pares(config.data_root)).index
+
+    # la media y el desvío se calculan sobre todos los pares de entrenamiento
+    mean, std = calcular_media_std_pares(ParesDataset(config, ids=ids))
+
+    train_dataset = ParesDataset(config, is_train=True, mean=mean, std=std, ids=ids)
+    train_loader = DataLoader(
+                        train_dataset,
+                        batch_size=config.batch_size,
+                        shuffle=True,
+                        num_workers=config.num_workers
+                    )
+    return train_loader, mean, std
