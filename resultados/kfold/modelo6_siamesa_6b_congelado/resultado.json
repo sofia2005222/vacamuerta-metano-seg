@@ -1,0 +1,78 @@
+{
+  "nombre": "modelo6_siamesa_6b_congelado",
+  "arquitectura": "siamesa",
+  "bandas": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "indices": false,
+  "modo": "congelado",
+  "perdida": "ce_dice",
+  "pesos_clases": null,
+  "epocas": 50,
+  "lr": 0.001,
+  "folds_corridos": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "iou_val_media": 0.7603,
+  "iou_val_desvio": 0.0633,
+  "iou_val_ult10_media": 0.7338,
+  "iou_val_ult10_desvio": 0.056,
+  "mejores_epocas": [
+    33,
+    44,
+    30,
+    47,
+    25
+  ],
+  "por_fold": [
+    {
+      "fold": 0,
+      "pares_train": 128,
+      "pares_val": 31,
+      "iou_val": 0.6518,
+      "mejor_epoca": 33,
+      "iou_val_ult10": 0.6394
+    },
+    {
+      "fold": 1,
+      "pares_train": 126,
+      "pares_val": 33,
+      "iou_val": 0.7566,
+      "mejor_epoca": 44,
+      "iou_val_ult10": 0.7287
+    },
+    {
+      "fold": 2,
+      "pares_train": 128,
+      "pares_val": 31,
+      "iou_val": 0.7919,
+      "mejor_epoca": 30,
+      "iou_val_ult10": 0.77
+    },
+    {
+      "fold": 3,
+      "pares_train": 128,
+      "pares_val": 31,
+      "iou_val": 0.8004,
+      "mejor_epoca": 47,
+      "iou_val_ult10": 0.7778
+    },
+    {
+      "fold": 4,
+      "pares_train": 126,
+      "pares_val": 33,
+      "iou_val": 0.8009,
+      "mejor_epoca": 25,
+      "iou_val_ult10": 0.7529
+    }
+  ]
+}

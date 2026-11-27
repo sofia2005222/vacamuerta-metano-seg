@@ -1,0 +1,78 @@
+{
+  "nombre": "modelo2_fusion_6b_finetuning",
+  "arquitectura": "fusion",
+  "bandas": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "indices": false,
+  "modo": "finetuning",
+  "perdida": "ce_dice",
+  "pesos_clases": null,
+  "epocas": 50,
+  "lr": 0.001,
+  "folds_corridos": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "iou_val_media": 0.7609,
+  "iou_val_desvio": 0.0507,
+  "iou_val_ult10_media": 0.7358,
+  "iou_val_ult10_desvio": 0.047,
+  "mejores_epocas": [
+    40,
+    46,
+    30,
+    21,
+    34
+  ],
+  "por_fold": [
+    {
+      "fold": 0,
+      "pares_train": 128,
+      "pares_val": 31,
+      "iou_val": 0.6878,
+      "mejor_epoca": 40,
+      "iou_val_ult10": 0.6673
+    },
+    {
+      "fold": 1,
+      "pares_train": 126,
+      "pares_val": 33,
+      "iou_val": 0.7436,
+      "mejor_epoca": 46,
+      "iou_val_ult10": 0.7208
+    },
+    {
+      "fold": 2,
+      "pares_train": 128,
+      "pares_val": 31,
+      "iou_val": 0.7829,
+      "mejor_epoca": 30,
+      "iou_val_ult10": 0.7513
+    },
+    {
+      "fold": 3,
+      "pares_train": 128,
+      "pares_val": 31,
+      "iou_val": 0.7646,
+      "mejor_epoca": 21,
+      "iou_val_ult10": 0.7434
+    },
+    {
+      "fold": 4,
+      "pares_train": 126,
+      "pares_val": 33,
+      "iou_val": 0.8254,
+      "mejor_epoca": 34,
+      "iou_val_ult10": 0.7961
+    }
+  ]
+}

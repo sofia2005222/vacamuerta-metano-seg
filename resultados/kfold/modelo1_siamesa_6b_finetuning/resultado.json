@@ -1,0 +1,78 @@
+{
+  "nombre": "modelo1_siamesa_6b_finetuning",
+  "arquitectura": "siamesa",
+  "bandas": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "indices": false,
+  "modo": "finetuning",
+  "perdida": "ce_dice",
+  "pesos_clases": null,
+  "epocas": 50,
+  "lr": 0.001,
+  "folds_corridos": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "iou_val_media": 0.7755,
+  "iou_val_desvio": 0.0522,
+  "iou_val_ult10_media": 0.7465,
+  "iou_val_ult10_desvio": 0.0492,
+  "mejores_epocas": [
+    48,
+    42,
+    31,
+    42,
+    40
+  ],
+  "por_fold": [
+    {
+      "fold": 0,
+      "pares_train": 128,
+      "pares_val": 31,
+      "iou_val": 0.685,
+      "mejor_epoca": 48,
+      "iou_val_ult10": 0.6691
+    },
+    {
+      "fold": 1,
+      "pares_train": 126,
+      "pares_val": 33,
+      "iou_val": 0.7827,
+      "mejor_epoca": 42,
+      "iou_val_ult10": 0.7528
+    },
+    {
+      "fold": 2,
+      "pares_train": 128,
+      "pares_val": 31,
+      "iou_val": 0.7901,
+      "mejor_epoca": 31,
+      "iou_val_ult10": 0.7339
+    },
+    {
+      "fold": 3,
+      "pares_train": 128,
+      "pares_val": 31,
+      "iou_val": 0.8038,
+      "mejor_epoca": 42,
+      "iou_val_ult10": 0.7907
+    },
+    {
+      "fold": 4,
+      "pares_train": 126,
+      "pares_val": 33,
+      "iou_val": 0.8159,
+      "mejor_epoca": 40,
+      "iou_val_ult10": 0.7858
+    }
+  ]
+}
